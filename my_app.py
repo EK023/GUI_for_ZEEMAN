@@ -1,5 +1,12 @@
 import sys
-from PySide6.QtCore import QEvent, Qt
+from PySide6.QtCore import (
+    QEvent, 
+    Qt, 
+    QRegularExpression as QRegExp, # check if it's needed, no need for numbers but chem elems might need it
+    QEvent,
+    QPoint,
+)
+from PySide6.QtGui import QRegularExpressionValidator as QRegExpValidator, QDoubleValidator
 from PySide6.QtWidgets import (
     QApplication, 
     QVBoxLayout, 
@@ -9,6 +16,7 @@ from PySide6.QtWidgets import (
     QPushButton, 
     QCheckBox,
     QLabel,
+    QToolTip,
 )
 import pyqtgraph as pg
 import numpy as np
@@ -25,45 +33,30 @@ class Elements:
         self.fit = fit
         self.iterlist = iterlist
     
-
-
 class MainWindow(uiclass, baseclass):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        # self.plot_graph = pg.PlotWidget()
-        # self.setCentralWidget(self.plot_graph)
+        # Might need to use some external plotting tool and insert it 
+        # here before plotting, e.g., matplotlib or pyqtgraph
+
+
+        # In  the future let the user choose the data file for plotting
         data = np.loadtxt("plot1", usecols=(0, 1))
-        # time = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        # temperature = [30, 32, 34, 32, 33, 31, 29, 32, 35, 30]
         self.widget.plot(data[:, 0], data[:, 1])
 
         
         self.scroll_layout = QVBoxLayout(self.tab2_scrollAreaWidgetContents) # inside a scroll element
         self.elementWidgets = []
         self.elements = []
-        # for i, contact in enumerate(Elements): # if there are previous values to load from somewhere can use this
-        #     contactWidget = QWidget()
-        #     layout.addWidget(contactWidget)
-        #     contactLayout = QHBoxLayout(contactWidget)
-        #     edit = QLineEdit(contact.element)
-        #     pushButton = QPushButton(f"Edit {i}")
-        #     contactLayout.addWidget(edit)
-        #     contactLayout.addWidget(pushButton)
-        #     self.elementWidgets.append((edit, pushButton)) 
-
-        # a "spacer" at the bottom, in case there are not enough contact 
-        # widgets to vertically fill the scroll area
-        self.addElementButton = QPushButton("Add Element")
-        self.scroll_layout.addWidget(self.addElementButton)
         self.addElementButton.clicked.connect(self.add_element)
 
         self.scroll_layout.addStretch()
 
     def add_element(self):
         new_elem = Elements(len(self.elements)+1, "", 0.0)
-        if len(self.elements) == 0:
-            self.add_label_widget()
+        # if len(self.elements) == 0: # For adding labels inside the scroll box, not sure if I want them there
+        #     self.add_label_widget()
         self.elements.append(new_elem)
         self.add_element_widget(new_elem)
 
@@ -89,37 +82,68 @@ class MainWindow(uiclass, baseclass):
         elementLayout.addWidget(iter)
 
         self.elementWidgets.append((el, fit, iter))
-
-        # add stretch back
         self.scroll_layout.addStretch()
+
+
+    # Really buggy input validation, works only if the user inputs letters and 
+    # if input valid writes the inserted number twice
+    # def attach_number_tooltip(self, line_edit: QLineEdit): 
+    #     validator = QDoubleValidator() 
+    #     validator.setNotation(QDoubleValidator.StandardNotation) 
+    #     line_edit.setValidator(validator) 
+    
+    #     def event_filter(obj, event): 
+    #         if obj is line_edit and event.type() == QEvent.KeyPress: 
+    #             before = line_edit.text() 
+    #             result = QLineEdit.event(obj, event) 
+    #             after = line_edit.text()
+    #             if before == after and event.text().isalpha(): 
+    #                 QToolTip.showText( line_edit.mapToGlobal(QPoint(0, line_edit.height())), "Numbers only" ) 
+    #                 return result 
+    #             return False 
+    
+    #     line_edit.installEventFilter(line_edit) 
+    #     line_edit.eventFilter = event_filter
     
     def add_element_widget(self, element):
         # before stretch, remove stretch
         self.scroll_layout.takeAt(self.scroll_layout.count()-1)
-
-        i = len(self.elementWidgets)
 
         elementWidget = QWidget()
         self.scroll_layout.addWidget(elementWidget)
 
         elementLayout = QHBoxLayout(elementWidget)
 
-        el = QLineEdit(element.element)
-        # est = QLineEdit(element.estimate)
+        el = QLineEdit()
+        est = QLineEdit()
+        #self.attach_number_tooltip(est)
         fit = QCheckBox()
         iter = QCheckBox()
-        # button = QPushButton(f"Edit {i}")
+
+        # reg_ex = QRegExp("[0-9]+((\.|\,)[0-9]+)?")
+        # input_validator = QRegExpValidator(reg_ex, est)
+        # est.setValidator(input_validator)
+
+        # validator = QDoubleValidator() 
+        # validator.setNotation(QDoubleValidator.StandardNotation) 
+        # est.setValidator(validator)
+        # est.inputRejected.connect(lambda: est.setToolTip("Numbers only"))
+        
+        el.textChanged.connect(lambda text, e=element: setattr(e, "element", text)) 
+        est.textChanged.connect(lambda text, e=element: setattr(e, "estimate", float(text) if text else 0.0)) 
+        fit.stateChanged.connect(lambda state, e=element: setattr(e, "fit", bool(state))) 
+        iter.stateChanged.connect(lambda state, e=element: setattr(e, "iterlist", bool(state))) 
 
         elementLayout.addWidget(el)
-        # elementLayout.addWidget(est)
+        elementLayout.addWidget(est)
         elementLayout.addWidget(fit)
         elementLayout.addWidget(iter)
 
-        self.elementWidgets.append((el, fit, iter))
-
-        # add stretch back
+        self.elementWidgets.append((el, est, fit, iter))
         self.scroll_layout.addStretch()
-    
+        print(self.elementWidgets[0][0].text())      # How to access first element's name
+        print(self.elementWidgets[0][2].isChecked()) # How to access first element's fit checkbox
+        
     def event(self, event):
         if event.type() == QEvent.KeyPress and event.key() in (
             Qt.Key_Enter,
@@ -128,58 +152,10 @@ class MainWindow(uiclass, baseclass):
             self.focusNextPrevChild(True)
         return super().event(event)
 
+    def input_validation(self,):
+        pass
+
 app = QApplication(sys.argv)
 window = MainWindow()
 window.show()
 app.exec()
-
-# from random import randint
-
-# import pyqtgraph as pg
-# from PyQt6 import QtCore, QtWidgets
-
-# class MainWindow(QtWidgets.QMainWindow):
-#     def __init__(self):
-#         super().__init__()
-
-#         # Temperature vs time dynamic plot
-#         self.plot_graph = pg.PlotWidget()
-#         self.setCentralWidget(self.plot_graph)
-#         self.plot_graph.setBackground("w")
-#         pen = pg.mkPen(color=(255, 0, 0))
-#         self.plot_graph.setTitle("Temperature vs Time", color="b", size="20pt")
-#         styles = {"color": "red", "font-size": "18px"}
-#         self.plot_graph.setLabel("left", "Temperature (°C)", **styles)
-#         self.plot_graph.setLabel("bottom", "Time (min)", **styles)
-#         self.plot_graph.addLegend()
-#         self.plot_graph.showGrid(x=True, y=True)
-#         self.plot_graph.setYRange(20, 40)
-#         self.time = list(range(10))
-#         self.temperature = [randint(20, 40) for _ in range(10)]
-#         # Get a line reference
-#         self.line = self.plot_graph.plot(
-#             self.time,
-#             self.temperature,
-#             name="Temperature Sensor",
-#             pen=pen,
-#             symbol="+",
-#             symbolSize=15,
-#             symbolBrush="b",
-#         )
-#         # Add a timer to simulate new temperature measurements
-#         self.timer = QtCore.QTimer()
-#         self.timer.setInterval(300)
-#         self.timer.timeout.connect(self.update_plot)
-#         self.timer.start()
-
-#     def update_plot(self):
-#         self.time = self.time[1:]
-#         self.time.append(self.time[-1] + 1)
-#         self.temperature = self.temperature[1:]
-#         self.temperature.append(randint(20, 40))
-#         self.line.setData(self.time, self.temperature)
-
-# app = QtWidgets.QApplication([])
-# main = MainWindow()
-# main.show()
-# app.exec()
