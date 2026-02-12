@@ -2,3 +2,4 @@ plot1
 *.autosave
 *.TMP
 *.ui.*
+__pycache__/
