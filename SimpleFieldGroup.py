@@ -1,28 +1,26 @@
 from PySide6.QtWidgets import (
     QWidget,
-    QLineEdit,
     QCheckBox,
     QHBoxLayout,
     QLabel,
 )
-import NumberValidator
+from NumberValidator import NumericInput
+from BaseFieldGroup import BaseFieldGroup
 
-class FieldGroup(QWidget):
+class SimpleFieldGroup(BaseFieldGroup):
     def __init__(self, name, with_checkbox=True):
-        super().__init__()
-        self.name = name
+        super().__init__(name)
 
-        layout = QHBoxLayout(self)
         self.label = QLabel(name)
-        self.input = QLineEdit()
-
-        NumberValidator.NumericInput(self.input)
+        self.input = NumericInput()
 
         if with_checkbox:
             self.checkbox = QCheckBox()
-        
+
+        layout = QHBoxLayout(self)
         layout.addWidget(self.label)
         layout.addWidget(self.input)
+
         if hasattr(self, 'checkbox'):
             layout.addWidget(self.checkbox)
 

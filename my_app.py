@@ -6,35 +6,22 @@ from PySide6.QtCore import (
     QEvent,
     QPoint,
 )
-from PySide6.QtGui import QRegularExpressionValidator as QRegExpValidator, QDoubleValidator
 from PySide6.QtWidgets import (
     QApplication, 
     QVBoxLayout, 
-    QWidget, 
-    QHBoxLayout, 
-    QLineEdit, 
-    QPushButton, 
-    QCheckBox,
-    QLabel,
-    QToolTip,
 )
 import pyqtgraph as pg
 import numpy as np
 
-import NumberValidator
-import FieldGroup
+from Elements import Elements
+from SimpleFieldGroup import SimpleFieldGroup
+from ElementFieldGroup import ElementFieldGroup
 
 import matplotlib.pyplot as plt
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 
-class Elements:
-    def __init__(self, id, element, estimate, fit = False, iterlist = False):
-        self.id = id
-        self.element = element
-        self.estimate = estimate
-        self.fit = fit
-        self.iterlist = iterlist
+
     
 class MainWindow(uiclass, baseclass):
     def __init__(self):
@@ -66,52 +53,59 @@ class MainWindow(uiclass, baseclass):
 
         for name in ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal"]:
             if name == "res":
-                fg = FieldGroup.FieldGroup(name, with_checkbox=False)
+                fg = SimpleFieldGroup(name, with_checkbox=False)
             else:   
-                fg = FieldGroup.FieldGroup(name)
+                fg = SimpleFieldGroup(name)
             
             self.fields[name] = fg
             layout.takeAt(layout.count()-1)
             layout.addWidget(fg)
             layout.addStretch()
 
+    def collect_values(self):
+        results = {}
+
+        for name, field in self.fields.items():
+            results[name] = field.get()
+
+        
+        for i, element in enumerate(self.elements):
+            results[f"element_{i}"] = element.get()
+
+        return results
 
 
     def add_element(self):
-        new_elem = Elements(len(self.elements)+1, "", 0.0)
+        new_elem = Elements("", 0.0)
         self.elements.append(new_elem)
-        print(self.elements[0].estimate, "elements")
+        # print(self.elements[0].estimate, "elements")
         self.add_element_widget(new_elem)
 
     def add_element_widget(self, element):
         self.scroll_layout.takeAt(self.scroll_layout.count()-1)
 
-        elementWidget = QWidget()
-        self.scroll_layout.addWidget(elementWidget)
+        # elementLayout = QHBoxLayout(elementWidget)
 
-        elementLayout = QHBoxLayout(elementWidget)
+        # el = QLineEdit()
+        # est = NumericInput()
+        # fit = QCheckBox()
+        # iter = QCheckBox()
 
-        el = QLineEdit()
-        est = QLineEdit()
-        #self.number_validation(est) 
-        fit = QCheckBox()
-        iter = QCheckBox()
-
-        NumberValidator.NumericInput(est)
-
-        self.add_elements_to_layout(elementLayout, [el, est, fit, iter])
+        # self.add_elements_to_layout(elementLayout, [el, est, fit, iter])
         
-        # changes in fields are also saved to elements object, makes it easier to deal with them later
-        el.textChanged.connect(lambda text, e=element: setattr(e, "element", text)) 
-        est.textChanged.connect(lambda text, e=element: setattr(e, "estimate", float(text.replace(",", ".")))) 
-        fit.stateChanged.connect(lambda state, e=element: setattr(e, "fit", bool(state))) 
-        iter.stateChanged.connect(lambda state, e=element: setattr(e, "iterlist", bool(state))) 
+        # # changes in fields are also saved to elements object, makes it easier to deal with them later
+        # el.textChanged.connect(lambda text, e=element: setattr(e, "element", text)) 
+        # est.textChanged.connect(lambda text, e=element: setattr(e, "estimate", float(text.replace(",", ".")))) 
+        # fit.stateChanged.connect(lambda state, e=element: setattr(e, "fit", bool(state))) 
+        # iter.stateChanged.connect(lambda state, e=element: setattr(e, "iterlist", bool(state))) 
 
 
-        self.elementWidgets.append((el, est, fit, iter))
+        # self.elementWidgets.append((el, est, fit, iter))
+        group = ElementFieldGroup(element)
+        self.scroll_layout.addWidget(group)
         self.scroll_layout.addStretch()
-        print(self.elementWidgets[0][0].text())      # How to access first element's name
-        print(self.elementWidgets[0][2].isChecked()) # How to access first element's fit checkbox
+        # print(self.elementWidgets[0][0].text())      # How to access first element's name
+        # print(self.elementWidgets[0][2].isChecked()) # How to access first element's fit checkbox
 
     
     def add_elements_to_layout(self, layout, elements):
@@ -129,7 +123,7 @@ class MainWindow(uiclass, baseclass):
         return super().event(event)
 
     def save_data_to_file(self,):
-        self.elements
+        print(self.collect_values())
         
 
 app = QApplication(sys.argv)
