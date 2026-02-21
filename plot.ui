@@ -29,13 +29,13 @@
     </sizepolicy>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab_1">
     <attribute name="title">
      <string>Tab 1</string>
     </attribute>
-    <widget class="PlotWidget" name="widget" native="true">
+    <widget class="QWidget" name="widget" native="true">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -207,14 +207,6 @@
    </property>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>PlotWidget</class>
-   <extends>QWidget</extends>
-   <header>pyqtgraph</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
