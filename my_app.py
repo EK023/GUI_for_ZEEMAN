@@ -1,4 +1,5 @@
 import sys
+from unittest.mock import patch
 from PySide6.QtCore import (
     QEvent, 
     Qt, 
@@ -8,76 +9,58 @@ from PySide6.QtCore import (
 from PySide6.QtWidgets import (
     QApplication, 
     QVBoxLayout,
-    QLineEdit,
+    QFileDialog,
 )
+
 import pyqtgraph as pg
 import numpy as np
 
 from Elements import Elements
 from SimpleFieldGroup import SimpleFieldGroup
 from ElementFieldGroup import ElementFieldGroup
+from PlotController import PlotInteractionController
 
-import matplotlib.pyplot as plt
-from matplotlib.widgets import SpanSelector
 
-from matplotlib.backends.backend_qtagg import FigureCanvas, NavigationToolbar2QT as NavigationToolbar
-from matplotlib.figure import Figure
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
+
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 
-class MplCanvas(FigureCanvas):
 
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
-        super().__init__(self.fig)
 
     
 class MainWindow(uiclass, baseclass):
+    def selectFile(self):
+            filename, _ = QFileDialog.getOpenFileName(
+                self,
+                "Choose a data file",
+                "",
+                "Data Files (*.csv *.txt *.json);;All Files (*)"
+            )
+            if filename:
+                print("Selected file:", filename)
+                self.plotInteraction.loadData(filename)
+                
+
+                
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         # Might need to use some external plotting tool and insert it 
         # here before plotting, e.g., matplotlib or pyqtgraph
         self.plot_widget = QVBoxLayout(self.widget)
-        # In  the future let the user choose the data file for plotting
-        data = np.loadtxt("plot1", usecols=(0, 1))
-
         self.graph_ranges = QVBoxLayout(self.scrollAreaWidgetContents)
-        # from https://matplotlib.org/stable/gallery/widgets/span_selector.html
+
+        self.plotInteraction = PlotInteractionController(self.plot_widget, self.graph_ranges)
         
 
-        self.sc = MplCanvas(self, width=5, height=4, dpi=100)
-        x = data[:, 0]
-        y = data[:, 1]
-        self.x = x
-        self.y = y
+        
+        
+    
+        # In  the future let the user choose the data file for plotting
+        self.selectPlottingFileButton.clicked.connect(self.selectFile)
 
-        self.sc.axes.plot(x, y)
-        self.sc.axes.set_xlim(x.min(), x.max())
-        self.sc.axes.set_ylim(y.min(), y.max())
-        self.plot_widget.addWidget(self.sc)
-        self.plot_widget.addWidget(NavigationToolbar(self.sc, self))
-
-        def onselect(xmin, xmax):
-            indmin, indmax = np.searchsorted(self.x, (xmin, xmax))
-            indmax = min(len(self.x) - 1, indmax)
-
-            region_x = self.x[indmin:indmax]
-
-            if len(region_x) >= 2:
-                self.graph_ranges.addWidget(QLineEdit(f"Selected range: {region_x[0]:.2f} - {region_x[-1]:.2f}"))
-
-        self.span = SpanSelector(
-            self.sc.axes,
-            onselect,
-            "horizontal",
-            useblit=True,
-            props=dict(alpha=0.5, facecolor="tab:blue"), # can change color 
-            interactive=True,
-            drag_from_anywhere=True
-        )
-
+        # loadAndPlotData(self, "plot1")
         
         self.scroll_layout = QVBoxLayout(self.tab2_scrollAreaWidgetContents) # inside a scroll element
         self.scroll_layout2 = QVBoxLayout(self.simpleParams)
@@ -88,9 +71,6 @@ class MainWindow(uiclass, baseclass):
 
         self.scroll_layout2.addStretch()
         self.initiate_fields(self.scroll_layout2)
-        
-        
-
         self.scroll_layout.addStretch()
 
     def initiate_fields(self, layout):
@@ -132,9 +112,7 @@ class MainWindow(uiclass, baseclass):
     def add_elements_to_layout(self, layout, elements):
         for e in elements:
             layout.addWidget(e)
-        
-
-        
+               
     def event(self, event):
         if event.type() == QEvent.KeyPress and event.key() in (
             Qt.Key_Enter,

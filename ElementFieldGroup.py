@@ -1,8 +1,6 @@
 from PySide6.QtWidgets import (
-    QWidget,
     QCheckBox,
     QHBoxLayout,
-    QLabel,
     QLineEdit,
 )
 from NumberValidator import NumericInput

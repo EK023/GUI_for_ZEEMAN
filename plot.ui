@@ -44,6 +44,19 @@
        <height>571</height>
       </rect>
      </property>
+     <widget class="QPushButton" name="selectPlottingFileButton">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>240</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select File to Plot</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QScrollArea" name="waveRangeList">
      <property name="geometry">
@@ -73,25 +86,6 @@
     <attribute name="title">
      <string>Tab 2</string>
     </attribute>
-    <widget class="QSplitter" name="splitter">
-     <property name="geometry">
-      <rect>
-       <x>120</x>
-       <y>60</y>
-       <width>101</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>resolution</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="res_input"/>
-    </widget>
     <widget class="QScrollArea" name="scrollArea">
      <property name="geometry">
       <rect>
@@ -171,10 +165,10 @@
     <widget class="QScrollArea" name="scrollArea_2">
      <property name="geometry">
       <rect>
-       <x>120</x>
-       <y>120</y>
-       <width>181</width>
-       <height>321</height>
+       <x>70</x>
+       <y>60</y>
+       <width>231</width>
+       <height>381</height>
       </rect>
      </property>
      <property name="widgetResizable">
@@ -185,8 +179,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>179</width>
-        <height>319</height>
+        <width>229</width>
+        <height>379</height>
        </rect>
       </property>
      </widget>
