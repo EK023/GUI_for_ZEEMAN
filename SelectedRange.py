@@ -15,8 +15,8 @@ class SelectedRange(QObject):
 
     def __init__(self, min_val=0.0, max_val=0.0):
         super().__init__()
-        self._min = min_val
-        self._max = max_val
+        self._min = round(min_val, 2)
+        self._max = round(max_val, 2)
 
     @property
     def min(self):
@@ -35,6 +35,13 @@ class SelectedRange(QObject):
     def max(self, value):
         self._max = value
         self.changed.emit(self._min, self._max)
+
+    def set_silent(self, new_min, new_max):
+        self.blockSignals(True)
+        self._min = new_min
+        self._max = new_max
+        self.blockSignals(False)
+
 
     def get(self):
         return {

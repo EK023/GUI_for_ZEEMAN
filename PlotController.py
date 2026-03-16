@@ -17,16 +17,16 @@ class MplCanvas(FigureCanvas):
         super().__init__(self.fig)
 
 class PlotInteractionController:
-    def __init__(self, plot_widget, graph_ranges):
+    def __init__(self, plot_widget, graph_ranges, controllers):
         self.plot_widget = plot_widget
         self.graph_ranges = graph_ranges
-        self.controllers = []
+        self.controllers = controllers
         self.activeController = None
         self.isDragging = False
 
-    def loadData(self, filename):
+    def loadData(self, filename, button):
         data = np.loadtxt(filename, usecols=(0, 1))
-
+        button.hide()
         self.sc = MplCanvas(self, width=5, height=4, dpi=100)
         x = data[:, 0]
         y = data[:, 1]
@@ -40,7 +40,7 @@ class PlotInteractionController:
         self.plot_widget.addWidget(self.sc)
         #self.plot_widget.addWidget(NavigationToolbar(self.sc, self.plot_widget))
 
-        self.controllers = [] 
+        # self.controllers = [] 
         self.activeController = None
         self.isDragging = False
         self.sc.fig.canvas.mpl_connect("button_release_event", lambda e: setattr(self, "isDragging", False))

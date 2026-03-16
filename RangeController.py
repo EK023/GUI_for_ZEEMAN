@@ -23,8 +23,7 @@ class RangeController:
     def updatePatch(self, new_min, new_max):
         self.patch.set_x(new_min) 
         self.patch.set_width(new_max - new_min)
-        # self.model.min = new_min
-        # self.model.max = new_max
+        self.model.set_silent(round(new_min, 2), round(new_max, 2))
         self.patch.figure.canvas.draw_idle()
 
     def containsPatch(self, patch):
@@ -36,5 +35,11 @@ class RangeController:
     @property 
     def xmax(self): 
         return self.model.max
+
+    def get(self):
+        return {
+            "min": self.model.min,
+            "max": self.model.max,
+        }
 
     

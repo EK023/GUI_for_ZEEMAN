@@ -2,14 +2,14 @@
 <ui version="4.0">
  <class>Widget</class>
  <widget class="QWidget" name="Widget">
-  <property name="geometry">
+  <!-- <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>1000</width>
     <height>600</height>
    </rect>
-  </property>
+  </property> -->
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -44,25 +44,21 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <widget class="QPushButton" name="selectPlottingFileButton">
-          <property name="geometry">
-           <rect>
-            <x>330</x>
-            <y>270</y>
-            <width>105</width>
-            <height>24</height>
-           </rect>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Select File to Plot</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QPushButton" name="selectPlottingFileButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Select File to Plot</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
@@ -83,14 +79,6 @@
           <bool>true</bool>
          </property>
          <widget class="QWidget" name="scrollAreaWidgetContents">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>198</width>
-            <height>580</height>
-           </rect>
-          </property>
          </widget>
         </widget>
        </item>
@@ -107,14 +95,14 @@
           <bool>true</bool>
          </property>
          <widget class="QWidget" name="simpleParams">
-          <property name="geometry">
+          <!-- <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
             <width>550</width>
             <height>532</height>
            </rect>
-          </property>
+          </property> -->
          </widget>
         </widget>
        </item>
@@ -160,14 +148,14 @@
            <bool>true</bool>
           </property>
           <widget class="QWidget" name="tab2_scrollAreaWidgetContents">
-           <property name="geometry">
+           <!-- <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
              <width>222</width>
              <height>475</height>
             </rect>
-           </property>
+           </property> -->
           </widget>
          </widget>
          <widget class="QPushButton" name="addElementButton">
@@ -183,14 +171,14 @@
    </item>
   </layout>
   <widget class="QPushButton" name="saveConfButton">
-   <property name="geometry">
+   <!-- <property name="geometry">
     <rect>
      <x>850</x>
      <y>0</y>
      <width>151</width>
      <height>31</height>
     </rect>
-   </property>
+   </property> -->
    <property name="text">
     <string>Save Configurations</string>
    </property>

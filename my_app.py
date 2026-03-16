@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QFileDialog,
 )
+import json
 
 import pyqtgraph as pg
 import numpy as np
@@ -26,20 +27,20 @@ from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as Navigation
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 
-
-
-    
 class MainWindow(uiclass, baseclass):
+    
     def selectFile(self):
+            global filename
             filename, _ = QFileDialog.getOpenFileName(
                 self,
                 "Choose a data file",
                 "",
-                "Data Files (*.csv *.txt *.json);;All Files (*)"
+                "All Files (*);;Data Files (*.csv *.txt *.json)"
             )
             if filename:
-                print("Selected file:", filename)
-                self.plotInteraction.loadData(filename)
+                
+                self.fileName = filename
+                self.plotInteraction.loadData(filename, self.selectPlottingFileButton)
                 
 
                 
@@ -48,14 +49,12 @@ class MainWindow(uiclass, baseclass):
         self.setupUi(self)
         # Might need to use some external plotting tool and insert it 
         # here before plotting, e.g., matplotlib or pyqtgraph
-        self.plot_widget = QVBoxLayout(self.widget)
         self.graph_ranges = QVBoxLayout(self.scrollAreaWidgetContents)
 
-        self.plotInteraction = PlotInteractionController(self.plot_widget, self.graph_ranges)
-        
-
-        
-        
+        self.controllers = []
+        self.plot_widget = QVBoxLayout(self.widget)
+        #self.plotInteraction = PlotInteractionController(self.widget.layout(), self.graph_ranges, self.controllers)
+        self.plotInteraction = PlotInteractionController(self.plot_widget, self.graph_ranges, self.controllers)
     
         # In  the future let the user choose the data file for plotting
         self.selectPlottingFileButton.clicked.connect(self.selectFile)
@@ -89,10 +88,19 @@ class MainWindow(uiclass, baseclass):
 
     def collect_values(self):
         results = {}
+        print(self.controllers, "controllers in collect values")
         for name, field in self.fields.items():
             results[name] = field.get()    
         for i, element in enumerate(self.elements):
             results[f"element_{i}"] = element.get()
+        for i, controller in enumerate(self.controllers):
+            print(controller.get(), "controller get", controller.xmin, controller.xmax)
+
+            results[f"range_{i}"] = controller.get()
+        
+        print(filename, "filename in collect values")
+        results["file"] = filename
+
 
         return results
 
@@ -120,9 +128,21 @@ class MainWindow(uiclass, baseclass):
         ):
             self.focusNextPrevChild(True)
         return super().event(event)
+    
+    def show_save_file_dialog(self,values):
+        file_name, _ = QFileDialog.getSaveFileName(window, 'Save File', '', 'Text Files (*.txt);;All Files (*)')
+
+        if file_name:
+            with open(file_name, 'w') as file:
+                file.write(json.dumps(values))
+            print(f'Saved file: {file_name}')
 
     def save_data_to_file(self,):
-        print(self.collect_values())
+        values = self.collect_values()
+        print(values, "values in save data to file")
+        self.show_save_file_dialog(values)
+    
+
         
 
 app = QApplication(sys.argv)
