@@ -40,7 +40,12 @@ class MainWindow(uiclass, baseclass):
             if filename:
                 
                 self.fileName = filename
-                self.plotInteraction.loadData(filename, self.selectPlottingFileButton)
+                self.selectPlottingFileButton.hide()
+                self.verticalLayout_center.removeItem(self.verticalSpacerTop)
+                self.verticalLayout_center.removeItem(self.horizontalSpacerLeft)
+                self.verticalLayout_center.removeItem(self.horizontalSpacerRight)
+                self.verticalLayout_center.removeItem(self.verticalSpacerBottom)
+                self.plotInteraction.loadData(filename)
                 
 
                 
@@ -52,9 +57,9 @@ class MainWindow(uiclass, baseclass):
         self.graph_ranges = QVBoxLayout(self.scrollAreaWidgetContents)
 
         self.controllers = []
-        self.plot_widget = QVBoxLayout(self.widget)
-        #self.plotInteraction = PlotInteractionController(self.widget.layout(), self.graph_ranges, self.controllers)
-        self.plotInteraction = PlotInteractionController(self.plot_widget, self.graph_ranges, self.controllers)
+        # self.plot_widget = QVBoxLayout(self.widget)
+        self.plotInteraction = PlotInteractionController(self.widget.layout(), self.graph_ranges, self.controllers)
+        # self.plotInteraction = PlotInteractionController(self.plot_widget, self.graph_ranges, self.controllers)
     
         # In  the future let the user choose the data file for plotting
         self.selectPlottingFileButton.clicked.connect(self.selectFile)

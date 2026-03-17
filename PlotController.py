@@ -24,9 +24,8 @@ class PlotInteractionController:
         self.activeController = None
         self.isDragging = False
 
-    def loadData(self, filename, button):
+    def loadData(self, filename):
         data = np.loadtxt(filename, usecols=(0, 1))
-        button.hide()
         self.sc = MplCanvas(self, width=5, height=4, dpi=100)
         x = data[:, 0]
         y = data[:, 1]
