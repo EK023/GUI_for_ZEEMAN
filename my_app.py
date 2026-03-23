@@ -56,7 +56,6 @@ class MainWindow(uiclass, baseclass):
         self.plotInteraction = PlotInteractionController(self.widget.layout(), self.graph_ranges, self.controllers)
         # self.plotInteraction = PlotInteractionController(self.plot_widget, self.graph_ranges, self.controllers)
     
-        # In  the future let the user choose the data file for plotting
         self.selectPlottingFileButton.clicked.connect(self.selectFile)
 
         # loadAndPlotData(self, "plot1")
@@ -93,10 +92,7 @@ class MainWindow(uiclass, baseclass):
         for name, field in self.fields.items():
             results[name] = field.get()    
 
-        
-        # for i, element in enumerate(self.elements):
-        #     results[f"element_{i}"] = element.get()
-        results["elements"] = self.elementTable.to_dict()
+        results["elements"] = self.elementTable.to_dict() # Probably want to use that in a better way
         for i, controller in enumerate(self.controllers):
             print(controller.get(), "controller get", controller.xmin, controller.xmax)
 

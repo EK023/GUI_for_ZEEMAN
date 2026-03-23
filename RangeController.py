@@ -5,7 +5,6 @@ class RangeController:
     def __init__(self, axes, layout, xmin, xmax):
         self.model = SelectedRange(xmin, xmax)
 
-        # Create patch
         self.patch = axes.axvspan(
             xmin, xmax,
             alpha=0.2,
@@ -13,14 +12,16 @@ class RangeController:
             color="tab:blue"
         )
 
-        # Create UI widget
         layout.takeAt(layout.count()-1)
         self.widget = RangeFieldGroup(self.model)
         layout.addWidget(self.widget)
         layout.addStretch()
 
-        # Sync model → patch
         self.model.changed.connect(self.updatePatch)
+
+        self.widget.deleteRequest.connect(self._handle_delete)
+
+        self._delete_callback = None
 
     def updatePatch(self, new_min, new_max):
         self.patch.set_x(new_min) 
@@ -30,6 +31,13 @@ class RangeController:
 
     def containsPatch(self, patch):
         return patch is self.patch
+    
+    def set_delete_callback(self, callback):
+        self._delete_callback = callback
+
+    def _handle_delete(self):
+        if self._delete_callback:
+            self._delete_callback(self)
 
     @property 
     def xmin(self): 

@@ -39,7 +39,6 @@ class PlotInteractionController:
         self.plot_widget.addWidget(self.sc)
         #self.plot_widget.addWidget(NavigationToolbar(self.sc, self.plot_widget))
 
-        # self.controllers = [] 
         self.activeController = None
         self.isDragging = False
         self.sc.fig.canvas.mpl_connect("button_release_event", lambda e: setattr(self, "isDragging", False))
@@ -75,6 +74,7 @@ class PlotInteractionController:
 
         # Otherwise → create a new range
         controller = RangeController(self.sc.axes, self.graph_ranges, xmin, xmax)
+        controller.set_delete_callback(self.remove_controller)
         self.controllers.append(controller)
         self.activeController = controller
     
@@ -102,14 +102,11 @@ class PlotInteractionController:
             if controller.containsPatch(patch):
                 self.activeController = controller
 
-                # highlight active
                 controller.patch.set_alpha(0.6)
 
-                # snap span selector to this range
                 self.span.extents = (controller.model.min, controller.model.max)
                 self.span.set_active(True)
 
-                # update UI fields
                 controller.widget.min.setText(str(controller.model.min))
                 controller.widget.max.setText(str(controller.model.max))
 
@@ -119,48 +116,11 @@ class PlotInteractionController:
 
         self.sc.draw_idle()
 
-# from https://matplotlib.org/stable/gallery/widgets/span_selector.html
+    def remove_controller(self, controller):
+        controller.patch.remove()
 
-        # def onselect(xmin, xmax):
-        #     if xmin == xmax:
-        #         return
-        #     # if self.activeController is not None:
-        #     #     print(xmin, xmax, self.activeController.xmin, self.activeController.xmax, "xmins and xmaxs")
-        #     #     print("checking if new or update", self.activeController.xmin - 5, self.activeController.xmax - 5, self.activeController.xmin + 5, self.activeController.xmax + 5)
+        controller.widget.setParent(None)
 
-        #     if self.activeController is None or (not self.activeController.xmin - 10 <= xmin <= self.activeController.xmin + 10 and not self.activeController.xmax - 10 <= xmax <= self.activeController.xmax + 10 and not self.activeController.xmax - 10 <= xmin <= self.activeController.xmax + 10 and not self.activeController.xmin - 10 <= xmax <= self.activeController.xmin + 10):   
-        #         print("Creating new")
-        #         controller = RangeController(self.sc.axes, self.graph_ranges, xmin, xmax)
-        #         self.controllers.append(controller)
-        #         self.activeController = controller
+        self.controllers.remove(controller)
 
-        #     else: 
-        #         print("Updating")
-        #         self.activeController.updatePatch(xmin, xmax)
-
-
-        # def on_mouse_move(event):
-
-        #     #print("inAxes", event.inaxes, self.activeSpan)
-        #     self.sc.setCursor(Qt.SizeHorCursor)
-        #     if event.inaxes != self.sc.fig.canvas.axes:
-        #         self.sc.unsetCursor()
-        #         print(1)
-        #         return
-
-        #     # if no active span → default cursor
-        #     if self.activeSpan is None:
-        #         print(2)
-        #         self.sc.unsetCursor()
-        #         return
-
-        #     contains, _ = self.activeSpan.contains(event)
-
-        #     if contains:
-        #         # show resize/move cursor
-        #         print('TRUE')
-                
-        #     else:
-        #         self.sc.unsetCursor()
-
-        # self.sc.mpl_connect("motion_notify_event", on_mouse_move)
+        self.sc.draw_idle()

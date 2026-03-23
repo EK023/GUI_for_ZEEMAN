@@ -1,13 +1,3 @@
-# class SelectedRange:
-#     def __init__(self, min, max):
-#         self.min = min
-#         self.max = max
-
-#     def get(self):
-#         return {
-#             [self.min, self.max]
-#         }
-
 from PySide6.QtCore import QObject, Signal
 
 class SelectedRange(QObject):
