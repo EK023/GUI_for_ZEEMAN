@@ -1,25 +1,24 @@
 import sys
-from unittest.mock import patch
 from PySide6.QtCore import (
     QEvent, 
     Qt, 
-    QRegularExpression as QRegExp, # check if it's needed, no need for numbers but chem elems might need it
     QEvent,
 )
 from PySide6.QtWidgets import (
     QApplication, 
     QVBoxLayout,
     QFileDialog,
+    QLabel,
 )
 import json
 
 import pyqtgraph as pg
-import numpy as np
 
 from Elements import Elements
 from SimpleFieldGroup import SimpleFieldGroup
 from ElementFieldGroup import ElementFieldGroup
 from PlotController import PlotInteractionController
+from ElementTable import ElementTable
 
 
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
@@ -52,8 +51,6 @@ class MainWindow(uiclass, baseclass):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        # Might need to use some external plotting tool and insert it 
-        # here before plotting, e.g., matplotlib or pyqtgraph
         self.graph_ranges = QVBoxLayout(self.scrollAreaWidgetContents)
 
         self.controllers = []
@@ -66,7 +63,6 @@ class MainWindow(uiclass, baseclass):
 
         # loadAndPlotData(self, "plot1")
         
-        self.scroll_layout = QVBoxLayout(self.tab2_scrollAreaWidgetContents) # inside a scroll element
         self.scroll_layout2 = QVBoxLayout(self.simpleParams)
         self.elementWidgets = []
         self.elements = []
@@ -75,7 +71,8 @@ class MainWindow(uiclass, baseclass):
 
         self.scroll_layout2.addStretch()
         self.initiate_fields(self.scroll_layout2)
-        self.scroll_layout.addStretch()
+        self.elementTable = ElementTable(self.tab2_layout)
+
 
     def initiate_fields(self, layout):
         self.fields = {}
@@ -90,6 +87,8 @@ class MainWindow(uiclass, baseclass):
             layout.takeAt(layout.count()-1)
             layout.addWidget(fg)
             layout.addStretch()
+
+    
 
     def collect_values(self):
         results = {}
@@ -113,14 +112,7 @@ class MainWindow(uiclass, baseclass):
     def add_element(self):
         new_elem = Elements("", 0.0)
         self.elements.append(new_elem)
-        # print(self.elements[0].estimate, "elements")
-        self.add_element_widget(new_elem)
-
-    def add_element_widget(self, element):
-        self.scroll_layout.takeAt(self.scroll_layout.count()-1)
-        group = ElementFieldGroup(element)
-        self.scroll_layout.addWidget(group)
-        self.scroll_layout.addStretch()
+        self.elementTable.add_row(new_elem)
     
     def add_elements_to_layout(self, layout, elements):
         for e in elements:

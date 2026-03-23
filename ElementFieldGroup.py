@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import (
     QCheckBox,
-    QHBoxLayout,
     QLineEdit,
 )
 from NumberValidator import NumericInput
@@ -19,13 +18,6 @@ class ElementFieldGroup(BaseFieldGroup):
         self.fit.setChecked(model.fit)
         self.iterlist = QCheckBox()
         self.iterlist.setChecked(model.iterlist)
-
-
-        layout = QHBoxLayout(self)
-        layout.addWidget(self.element)
-        layout.addWidget(self.estimate)
-        layout.addWidget(self.fit)
-        layout.addWidget(self.iterlist)
 
         self.element.textChanged.connect(lambda text: setattr(self.model, 'element', text))
         self.estimate.textChanged.connect(lambda text: setattr(self.model, 'estimate', float(text.replace(",", "."))))

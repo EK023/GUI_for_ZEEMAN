@@ -14,8 +14,10 @@ class RangeController:
         )
 
         # Create UI widget
+        layout.takeAt(layout.count()-1)
         self.widget = RangeFieldGroup(self.model)
         layout.addWidget(self.widget)
+        layout.addStretch()
 
         # Sync model → patch
         self.model.changed.connect(self.updatePatch)
