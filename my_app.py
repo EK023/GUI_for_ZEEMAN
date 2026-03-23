@@ -8,7 +8,6 @@ from PySide6.QtWidgets import (
     QApplication, 
     QVBoxLayout,
     QFileDialog,
-    QLabel,
 )
 import json
 
@@ -16,7 +15,6 @@ import pyqtgraph as pg
 
 from Elements import Elements
 from SimpleFieldGroup import SimpleFieldGroup
-from ElementFieldGroup import ElementFieldGroup
 from PlotController import PlotInteractionController
 from ElementTable import ElementTable
 
@@ -65,8 +63,7 @@ class MainWindow(uiclass, baseclass):
         
         self.scroll_layout2 = QVBoxLayout(self.simpleParams)
         self.elementWidgets = []
-        self.elements = []
-        self.addElementButton.clicked.connect(self.add_element)
+        self.addElementButton.clicked.connect(lambda: self.elementTable.add_row(Elements("",0.0)))
         self.saveConfButton.clicked.connect(self.save_data_to_file)
 
         self.scroll_layout2.addStretch()
@@ -95,8 +92,11 @@ class MainWindow(uiclass, baseclass):
         print(self.controllers, "controllers in collect values")
         for name, field in self.fields.items():
             results[name] = field.get()    
-        for i, element in enumerate(self.elements):
-            results[f"element_{i}"] = element.get()
+
+        
+        # for i, element in enumerate(self.elements):
+        #     results[f"element_{i}"] = element.get()
+        results["elements"] = self.elementTable.to_dict()
         for i, controller in enumerate(self.controllers):
             print(controller.get(), "controller get", controller.xmin, controller.xmax)
 
@@ -107,12 +107,7 @@ class MainWindow(uiclass, baseclass):
 
 
         return results
-
-
-    def add_element(self):
-        new_elem = Elements("", 0.0)
-        self.elements.append(new_elem)
-        self.elementTable.add_row(new_elem)
+        
     
     def add_elements_to_layout(self, layout, elements):
         for e in elements:
