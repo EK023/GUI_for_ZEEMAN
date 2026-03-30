@@ -6,8 +6,8 @@ from PySide6.QtWidgets import (
     QLabel,
 )
 
-from Elements import Elements
-from ElementFieldGroup import ElementFieldGroup
+from Models.Elements import Elements
+from Rows.ElementRow import ElementRow
 
 class ElementTable:
     def __init__(self, layout):
@@ -29,7 +29,7 @@ class ElementTable:
     def add_row(self, model: Elements):
         row = self.current_row
 
-        group = ElementFieldGroup(model)
+        group = ElementRow(model)
 
         delete_button = QPushButton("X")
         delete_button.clicked.connect(lambda _, g=group: self.remove_row(g))

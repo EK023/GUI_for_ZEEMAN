@@ -4,9 +4,9 @@ from PySide6.QtWidgets import (
     QLabel,
 )
 from NumberValidator import NumericInput
-from BaseFieldGroup import BaseFieldGroup
+from Rows.BaseRow import BaseRow
 
-class SimpleFieldGroup(BaseFieldGroup):
+class ParameterRow(BaseRow):
     def __init__(self, name, with_checkbox=True):
         super().__init__(name)
 

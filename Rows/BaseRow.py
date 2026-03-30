@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
 
 )
 
-class BaseFieldGroup(QWidget):
+class BaseRow(QWidget):
     def __init__(self, name=None):
         super().__init__()
         self.name = name

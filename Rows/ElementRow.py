@@ -3,10 +3,10 @@ from PySide6.QtWidgets import (
     QLineEdit,
 )
 from NumberValidator import NumericInput
-from BaseFieldGroup import BaseFieldGroup
-from Elements import Elements
+from Rows.BaseRow import BaseRow
+from Models.Elements import Elements
 
-class ElementFieldGroup(BaseFieldGroup):
+class ElementRow(BaseRow):
     def __init__(self, model: Elements):
         super().__init__()
         self.model= model

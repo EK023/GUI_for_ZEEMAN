@@ -1,5 +1,5 @@
-from RangeFieldGroup import RangeFieldGroup
-from SelectedRange import SelectedRange
+from Rows.RangeRow import RangeRow
+from Models.SelectedRange import SelectedRange
 
 class RangeController:
     def __init__(self, axes, layout, xmin, xmax):
@@ -13,7 +13,7 @@ class RangeController:
         )
 
         layout.takeAt(layout.count()-1)
-        self.widget = RangeFieldGroup(self.model)
+        self.widget = RangeRow(self.model)
         layout.addWidget(self.widget)
         layout.addStretch()
 

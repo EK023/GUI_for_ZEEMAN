@@ -7,7 +7,7 @@ from PySide6.QtCore import (
     Qt, 
 )
 
-from RangeController import RangeController
+from Controllers.RangeController import RangeController
 
 class MplCanvas(FigureCanvas):
 

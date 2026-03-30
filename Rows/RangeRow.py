@@ -5,10 +5,10 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal
 
 from NumberValidator import NumericInput
-from BaseFieldGroup import BaseFieldGroup
-from SelectedRange import SelectedRange
+from Rows.BaseRow import BaseRow
+from Models.SelectedRange import SelectedRange
 
-class RangeFieldGroup(BaseFieldGroup):
+class RangeRow(BaseRow):
 
     deleteRequest = Signal()
 

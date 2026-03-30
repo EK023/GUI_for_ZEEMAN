@@ -13,9 +13,9 @@ import json
 
 import pyqtgraph as pg
 
-from Elements import Elements
-from SimpleFieldGroup import SimpleFieldGroup
-from PlotController import PlotInteractionController
+from Models.Elements import Elements
+from Rows.ParameterRow import ParameterRow
+from Controllers.PlotController import PlotInteractionController
 from ElementTable import ElementTable
 
 
@@ -75,9 +75,9 @@ class MainWindow(uiclass, baseclass):
 
         for name in ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal"]:
             if name == "res":
-                fg = SimpleFieldGroup(name, with_checkbox=False)
+                fg = ParameterRow(name, with_checkbox=False)
             else:   
-                fg = SimpleFieldGroup(name)
+                fg = ParameterRow(name)
             
             self.fields[name] = fg
             layout.takeAt(layout.count()-1)
