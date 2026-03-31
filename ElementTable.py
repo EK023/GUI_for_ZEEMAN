@@ -12,7 +12,7 @@ from Rows.ElementRow import ElementRow
 class ElementTable:
     def __init__(self, layout):
         self.layout = layout
-        layout.setAlignment(Qt.AlignTop)
+        # layout.setAlignment(Qt.AlignTop)
         self.current_row = 1
         self.rows = []
 

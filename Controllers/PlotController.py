@@ -36,6 +36,12 @@ class PlotInteractionController:
         self.sc.axes.set_xlim(x.min(), x.max())
         self.sc.axes.set_ylim(y.min(), y.max())
         
+        while self.plot_widget.count():
+            item = self.plot_widget.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+        
         self.plot_widget.addWidget(self.sc)
         #self.plot_widget.addWidget(NavigationToolbar(self.sc, self.plot_widget))
 

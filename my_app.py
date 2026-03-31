@@ -6,7 +6,6 @@ from PySide6.QtCore import (
 )
 from PySide6.QtWidgets import (
     QApplication, 
-    QVBoxLayout,
     QFileDialog,
 )
 import json
@@ -17,6 +16,7 @@ from Models.Elements import Elements
 from Rows.ParameterRow import ParameterRow
 from Controllers.PlotController import PlotInteractionController
 from ElementTable import ElementTable
+from Dropdown import DropDownMenu
 
 
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
@@ -37,37 +37,27 @@ class MainWindow(uiclass, baseclass):
             if filename:
                 
                 self.fileName = filename
-                self.selectPlottingFileButton.hide()
-                self.verticalLayout_center.removeItem(self.verticalSpacerTop)
-                self.verticalLayout_center.removeItem(self.horizontalSpacerLeft)
-                self.verticalLayout_center.removeItem(self.horizontalSpacerRight)
-                self.verticalLayout_center.removeItem(self.verticalSpacerBottom)
+                self.filePathLabel.setText(filename)
                 self.plotInteraction.loadData(filename)
-                
-
                 
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.graph_ranges = QVBoxLayout(self.scrollAreaWidgetContents)
+
+        self.elementDropDown = DropDownMenu(self.SelectElements)
 
         self.controllers = []
-        # self.plot_widget = QVBoxLayout(self.widget)
-        self.plotInteraction = PlotInteractionController(self.widget.layout(), self.graph_ranges, self.controllers)
-        # self.plotInteraction = PlotInteractionController(self.plot_widget, self.graph_ranges, self.controllers)
-    
+        self.plotInteraction = PlotInteractionController(self.plotArea.layout(), self.waveRangeContents.layout(), self.controllers)
+        
         self.selectPlottingFileButton.clicked.connect(self.selectFile)
 
-        # loadAndPlotData(self, "plot1")
-        
-        self.scroll_layout2 = QVBoxLayout(self.simpleParams)
         self.elementWidgets = []
         self.addElementButton.clicked.connect(lambda: self.elementTable.add_row(Elements("",0.0)))
         self.saveConfButton.clicked.connect(self.save_data_to_file)
 
-        self.scroll_layout2.addStretch()
-        self.initiate_fields(self.scroll_layout2)
-        self.elementTable = ElementTable(self.tab2_layout)
+        self.paramsGroup.layout().addStretch()
+        self.initiate_fields(self.paramsGroup.layout())
+        self.elementTable = ElementTable(self.elementsContainer.layout())
 
 
     def initiate_fields(self, layout):
@@ -130,9 +120,6 @@ class MainWindow(uiclass, baseclass):
         print(values, "values in save data to file")
         self.show_save_file_dialog(values)
     
-
-        
-
 app = QApplication(sys.argv)
 window = MainWindow()
 window.show()

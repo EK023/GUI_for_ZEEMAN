@@ -16,27 +16,34 @@
   <layout class="QVBoxLayout" name="mainLayout">
    <item>
     <layout class="QHBoxLayout" name="topBar">
-    <item>
-    <spacer name="horizontalSpacer">
-      <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-      </property>
-    </spacer>
-  </item>
      <item>
-      <widget class="QPushButton" name="saveConfButton">
-        <property name="text">
-            <string>Save Configurations</string>
-        </property>
-        <property name="minimumSize">
-              <size>
-               <height>24</height>
-              </size>
-        </property>
+      <widget class="QPushButton" name="selectPlottingFileButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Select File to Plot</string>
+       </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer1">
+      <widget class="QLabel" name="filePathLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>No file selected</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="topSpacer">
        <property name="orientation">
         <enum>Qt::Orientation::Horizontal</enum>
        </property>
@@ -48,162 +55,169 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QToolButton" name="SelectElements">
+       <property name="text">
+        <string>SelectElements</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Policy::Maximum</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="saveConfButton">
+       <property name="text">
+        <string>Save Configurations</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QSplitter" name="mainSplitter">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
-     <property name="currentIndex">
-      <number>1</number>
-     </property>
-
-     <widget class="QWidget" name="tab_1">
-      <property name="minimumSize">
-       <size>
-        <width>800</width>
-        <height>600</height>
-       </size>
-      </property>
-      <attribute name="title">
-       <string>Tab 1</string>
-      </attribute>
-
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       
+     <widget class="QWidget" name="leftPanel">
+      <layout class="QVBoxLayout" name="leftLayout">
        <item>
-        <widget class="QWidget" name="widget" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout_center">
-
-            <item>
-            <spacer name="verticalSpacerTop">
-            <property name="orientation">
-                <enum>Qt::Vertical</enum>
-            </property>
-            </spacer>
-            </item>
-
-            <item>
-            <layout class="QHBoxLayout" name="centerRow">
-
-            <item>
-                <spacer name="horizontalSpacerLeft">
-                <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                </property>
-                </spacer>
-            </item>
-
-            <item>
-         <widget class="QPushButton" name="selectPlottingFileButton">
-          <property name="text">
-           <string>Select File to Plot</string>
-          </property>
-         </widget>
-         </item>
-
-         <item>
-            <spacer name="horizontalSpacerRight">
-            <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-            </property>
-            </spacer>
-        </item>
-
-            </layout>
-        </item>
-
-        <item>
-    <spacer name="verticalSpacerBottom">
-      <property name="orientation">
-        <enum>Qt::Vertical</enum>
-      </property>
-    </spacer>
-  </item>
-
-</layout>
-
-        </widget>
+        <layout class="QHBoxLayout" name="fileRow"/>
        </item>
        <item>
-        <widget class="QScrollArea" name="waveRangeList">
+        <widget class="QFrame" name="plotArea">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding"/>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>250</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents"/>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-
-
-
-
-     <widget class="QWidget" name="tab_2">
-      <attribute name="title">
-       <string>Tab 2</string>
-      </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QScrollArea" name="scrollArea_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="frameShape">
+          <enum>QFrame::Shape::StyledPanel</enum>
+         </property>
+         <layout class="QVBoxLayout" name="plotLayout"/>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="rightPanel">
+      <layout class="QVBoxLayout" name="rightPanelLayout">
+       <item>
+        <widget class="QScrollArea" name="controlScrollArea">
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
-         <widget class="QWidget" name="simpleParams">
+         <widget class="QWidget" name="controlContainer">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>475</width>
-            <height>582</height>
+            <width>381</width>
+            <height>337</height>
            </rect>
           </property>
-         </widget>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="rightPanel">
-         <layout class="QVBoxLayout" name="rightLayout">
-
-        <item>
-         <widget class="QScrollArea" name="scrollArea">
-          <property name="widgetResizable">
-           <bool>true</bool>
-          </property>
-          <widget class="QWidget" name="tab2_scrollAreaWidgetContents">
-          <layout class="QGridLayout" name="tab2_layout"/>
-          </widget>
-         </widget>
-        </item>
-
-        <item>
-         <widget class="QPushButton" name="addElementButton">
-          <property name="text">
-           <string>Add Element</string>
-          </property>
-         </widget>
-         </item>
-
+          <layout class="QVBoxLayout" name="controlLayout">
+           <item>
+            <widget class="QGroupBox" name="waveGroup">
+             <property name="title">
+              <string>Wave Ranges</string>
+             </property>
+             <layout class="QVBoxLayout" name="waveLayout">
+              <item>
+               <widget class="QScrollArea" name="waveRangeList">
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <widget class="QWidget" name="waveRangeContents">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>337</width>
+                   <height>68</height>
+                  </rect>
+                 </property>
+                 <layout class="QVBoxLayout" name="waveRangeInnerLayout"/>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="paramsGroup">
+             <property name="title">
+              <string>Parameters</string>
+             </property>
+             <layout class="QVBoxLayout" name="paramsLayout">
+              <item>
+               <layout class="QVBoxLayout" name="simpleParamsLayout"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="elementsGroup">
+             <property name="title">
+              <string>Elements</string>
+             </property>
+             <layout class="QVBoxLayout" name="elementsLayout">
+              <item>
+               <widget class="QScrollArea" name="elementsScrollArea">
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <widget class="QWidget" name="elementsContainer">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>337</width>
+                   <height>68</height>
+                  </rect>
+                 </property>
+                 <layout class="QGridLayout" name="tab2_layout"/>
+                </widget>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="addElementButton">
+                <property name="text">
+                 <string>Add Element</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="bottomSpacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
+         </widget>
         </widget>
        </item>
       </layout>
