@@ -1,10 +1,12 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QCheckBox, QLineEdit, QScrollArea, QFrame
 )
-from PySide6.QtCore import Qt
-import numpy as np
+from PySide6.QtCore import Qt, Signal
 
 class MultiSelectPopup(QWidget):
+
+    elementToggled = Signal(str, bool)
+
     def __init__(self, elements, parent=None, max_height=300):
         super().__init__(parent, Qt.Popup)
         self.setWindowFlags(Qt.Popup)
@@ -39,11 +41,11 @@ class MultiSelectPopup(QWidget):
         self.search_bar.textChanged.connect(self.filter_elements)
 
     def on_toggled(self, element, state):       
-        state = Qt.CheckState(state)
-        if state == Qt.Checked:
-            print(f"Add {element}")
+        state = Qt.CheckState(state) == Qt.Checked
+        if state:
+            self.elementToggled.emit(element, state)
         else:
-            print(f"Remove {element}")
+            self.elementToggled.emit(element, state)
     
     def filter_elements(self, text):
         text = text.lower()
@@ -54,22 +56,12 @@ class MultiSelectPopup(QWidget):
 class DropDownMenu(QWidget):
 
     # Need to decide where the app is exactly when its used, maybe even let user conf the file location
-    def __init__(self, elementButton):
+    def __init__(self, elementButton, elements):
         super().__init__()
         self.elementButton = elementButton
 
-        elementFile = "newatom.dat"
-
-        with open (elementFile) as f:
-            count = int(f.readline())
-        data = np.loadtxt(elementFile, 
-                          dtype=[ ("estimates", float), ("elements", "U2")],
-                          usecols=(2, 10), skiprows=1, max_rows=count
-                          )
-        
-
         # elements = ["H", "He", "Li", "Be", "B", "C"]
-        self.popup = MultiSelectPopup(data["elements"], self)
+        self.popup = MultiSelectPopup(elements, self)
 
         self.elementButton.clicked.connect(self.show_popup)
 

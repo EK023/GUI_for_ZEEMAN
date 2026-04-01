@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QFileDialog,
 )
 import json
+import numpy as np
 
 import pyqtgraph as pg
 
@@ -44,7 +45,11 @@ class MainWindow(uiclass, baseclass):
         super().__init__()
         self.setupUi(self)
 
-        self.elementDropDown = DropDownMenu(self.SelectElements)
+        self.controlScrollArea.setMinimumWidth(250)
+        self.controlScrollArea.setMaximumWidth(250)
+
+        self.mainSplitter.setStretchFactor(0, 1) 
+        self.mainSplitter.setStretchFactor(1, 0)
 
         self.controllers = []
         self.plotInteraction = PlotInteractionController(self.plotArea.layout(), self.waveRangeContents.layout(), self.controllers)
@@ -52,12 +57,33 @@ class MainWindow(uiclass, baseclass):
         self.selectPlottingFileButton.clicked.connect(self.selectFile)
 
         self.elementWidgets = []
-        self.addElementButton.clicked.connect(lambda: self.elementTable.add_row(Elements("",0.0)))
+        # self.addElementButton.clicked.connect(lambda: self.elementTable.add_row(Elements("",0.0)))
         self.saveConfButton.clicked.connect(self.save_data_to_file)
 
         self.paramsGroup.layout().addStretch()
         self.initiate_fields(self.paramsGroup.layout())
         self.elementTable = ElementTable(self.elementsContainer.layout())
+
+        self.elementData = self.load_elements("newatom.dat")
+
+        self.elementDropDown = DropDownMenu(self.SelectElements, self.elementData.keys())
+
+        self.elementDropDown.popup.elementToggled.connect(self.handle_element_toggle)
+
+    def load_elements(self, filename):
+        with open (filename) as f:
+            count = int(f.readline())
+        data = np.loadtxt(filename, 
+                          dtype=[ ("estimates", float), ("elements", "U2")],
+                          usecols=(2, 10), skiprows=1, max_rows=count
+                          )
+        return {el: est for el, est in zip(data["elements"], data["estimates"])}
+        
+    def handle_element_toggle(self, element, checked):
+        if checked:
+            self.elementTable.add_element(Elements(element, self.elementData[element]))
+        else:
+            self.elementTable.remove_element(element)
 
 
     def initiate_fields(self, layout):

@@ -19,7 +19,6 @@ class ElementRow(BaseRow):
         self.iterlist = QCheckBox()
         self.iterlist.setChecked(model.iterlist)
 
-        self.element.textChanged.connect(lambda text: setattr(self.model, 'element', text))
         self.estimate.textChanged.connect(lambda text: setattr(self.model, 'estimate', float(text.replace(",", "."))))
         self.fit.stateChanged.connect(lambda state: setattr(self.model, 'fit', bool(state)))
         self.iterlist.stateChanged.connect(lambda state: setattr(self.model, 'iterlist', bool(state)))

@@ -89,6 +89,12 @@
    </item>
    <item>
     <widget class="QSplitter" name="mainSplitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
@@ -117,6 +123,15 @@
       <layout class="QVBoxLayout" name="rightPanelLayout">
        <item>
         <widget class="QScrollArea" name="controlScrollArea">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -125,32 +140,32 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>381</width>
-            <height>337</height>
+            <width>831</width>
+            <height>628</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="controlLayout">
            <item>
-            <widget class="QGroupBox" name="waveGroup">
+            <widget class="QGroupBox" name="elementsGroup">
              <property name="title">
-              <string>Wave Ranges</string>
+              <string>Elements</string>
              </property>
-             <layout class="QVBoxLayout" name="waveLayout">
+             <layout class="QVBoxLayout" name="elementsLayout">
               <item>
-               <widget class="QScrollArea" name="waveRangeList">
+               <widget class="QScrollArea" name="elementsScrollArea">
                 <property name="widgetResizable">
                  <bool>true</bool>
                 </property>
-                <widget class="QWidget" name="waveRangeContents">
+                <widget class="QWidget" name="elementsContainer">
                  <property name="geometry">
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>337</width>
-                   <height>68</height>
+                   <width>787</width>
+                   <height>229</height>
                   </rect>
                  </property>
-                 <layout class="QVBoxLayout" name="waveRangeInnerLayout"/>
+                 <layout class="QGridLayout" name="tab2_layout"/>
                 </widget>
                </widget>
               </item>
@@ -170,34 +185,27 @@
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="elementsGroup">
+            <widget class="QGroupBox" name="waveGroup">
              <property name="title">
-              <string>Elements</string>
+              <string>Wave Ranges</string>
              </property>
-             <layout class="QVBoxLayout" name="elementsLayout">
+             <layout class="QVBoxLayout" name="waveLayout">
               <item>
-               <widget class="QScrollArea" name="elementsScrollArea">
+               <widget class="QScrollArea" name="waveRangeList">
                 <property name="widgetResizable">
                  <bool>true</bool>
                 </property>
-                <widget class="QWidget" name="elementsContainer">
+                <widget class="QWidget" name="waveRangeContents">
                  <property name="geometry">
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>337</width>
-                   <height>68</height>
+                   <width>787</width>
+                   <height>228</height>
                   </rect>
                  </property>
-                 <layout class="QGridLayout" name="tab2_layout"/>
+                 <layout class="QVBoxLayout" name="waveRangeInnerLayout"/>
                 </widget>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="addElementButton">
-                <property name="text">
-                 <string>Add Element</string>
-                </property>
                </widget>
               </item>
              </layout>
@@ -207,6 +215,9 @@
             <spacer name="bottomSpacer">
              <property name="orientation">
               <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Policy::Minimum</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
