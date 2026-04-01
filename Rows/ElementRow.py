@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QCheckBox,
-    QLineEdit,
+    QLabel,
 )
 from NumberValidator import NumericInput
 from Rows.BaseRow import BaseRow
@@ -12,7 +12,7 @@ class ElementRow(BaseRow):
         self.model= model
 
 
-        self.element = QLineEdit(model.element) # In future maybe another validator for chem el
+        self.element = QLabel(model.element)
         self.estimate = NumericInput(str(model.estimate))
         self.fit = QCheckBox()
         self.fit.setChecked(model.fit)
