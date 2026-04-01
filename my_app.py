@@ -15,13 +15,10 @@ import pyqtgraph as pg
 
 from Models.Elements import Elements
 from Rows.ParameterRow import ParameterRow
+from Rows.FileSelectRow import FileSelectRow
 from Controllers.PlotController import PlotInteractionController
 from ElementTable import ElementTable
 from Dropdown import DropDownMenu
-
-
-from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
-
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 
@@ -45,14 +42,17 @@ class MainWindow(uiclass, baseclass):
         super().__init__()
         self.setupUi(self)
 
-        self.controlScrollArea.setMinimumWidth(250)
-        self.controlScrollArea.setMaximumWidth(250)
+        self.rightPanel.setMinimumWidth(250)
+        self.rightPanel.setMaximumWidth(250)
+
+        self.page_3.setMinimumWidth(250)
+        self.page_3.setMaximumWidth(250)
 
         self.mainSplitter.setStretchFactor(0, 1) 
         self.mainSplitter.setStretchFactor(1, 0)
 
         self.controllers = []
-        self.plotInteraction = PlotInteractionController(self.plotArea.layout(), self.waveRangeContents.layout(), self.controllers)
+        self.plotInteraction = PlotInteractionController(self.plotArea, self.waveRangeContents.layout(), self.controllers)
         
         self.selectPlottingFileButton.clicked.connect(self.selectFile)
 
@@ -60,8 +60,7 @@ class MainWindow(uiclass, baseclass):
         # self.addElementButton.clicked.connect(lambda: self.elementTable.add_row(Elements("",0.0)))
         self.saveConfButton.clicked.connect(self.save_data_to_file)
 
-        self.paramsGroup.layout().addStretch()
-        self.initiate_fields(self.paramsGroup.layout())
+        self.initiate_fields(self.page_3.layout())
         self.elementTable = ElementTable(self.elementsContainer.layout())
 
         self.elementData = self.load_elements("newatom.dat")
@@ -89,16 +88,21 @@ class MainWindow(uiclass, baseclass):
     def initiate_fields(self, layout):
         self.fields = {}
 
-        for name in ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal"]:
-            if name == "res":
-                fg = ParameterRow(name, with_checkbox=False)
+        params = ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal", "save file", "show plot", "wave from text", "mainpath", "vlinespath", "contpoly", "n iter"]
+
+        for name in params:
+            row = params.index(name)
+            if name in ["res", "n iter"]:
+                fg = ParameterRow(name, layout, row, with_checkbox=False)
+            elif name in ["save file", "show plot", "wave from text"]:
+                fg = ParameterRow(name, layout, row, with_text=False, with_checkbox=True)
+            elif name in ["mainpath", "vlinespath", "contpoly"]:
+                fg = FileSelectRow(name, layout, row)
             else:   
-                fg = ParameterRow(name)
+                fg = ParameterRow(name, layout, row)
             
             self.fields[name] = fg
-            layout.takeAt(layout.count()-1)
             layout.addWidget(fg)
-            layout.addStretch()
 
     
 

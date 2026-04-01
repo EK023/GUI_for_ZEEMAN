@@ -3,8 +3,9 @@ from PySide6.QtGui import QDoubleValidator
 from PySide6.QtCore import QEvent, QPoint
 
 class NumericInput(QLineEdit):
-    def __init__(self, parent=None):
+    def __init__(self, nr=0.0, parent=None):
         super().__init__(parent)
+        self.setText(str(nr))
 
         # Set up the validator
         validator = QDoubleValidator()

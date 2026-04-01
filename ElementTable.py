@@ -2,7 +2,6 @@ from PySide6.QtCore import (
     Qt, 
 )
 from PySide6.QtWidgets import (
-    QPushButton,
     QLabel,
 )
 
@@ -19,12 +18,13 @@ class ElementTable:
         self._init_headers()
 
     def _init_headers(self):
-        headers = ["Element", "Estimate", "Fit", "Iter"]
-
+        headers = ["Element", "Estimate", "  Fit  ", "  Iter  "]
+        self.layout.setRowStretch(999, 1)
         for col, text in enumerate(headers):
             label = QLabel(text)
-            label.setAlignment(Qt.AlignCenter)
-            self.layout.addWidget(label, 0, col)
+            self.layout.addWidget(label, 0, col )
+
+        # self.layout.
 
     def add_element(self, model: Elements):
         element = model.element
@@ -34,6 +34,7 @@ class ElementTable:
         row = self.current_row
 
         group = ElementRow(model)
+
 
         self.layout.addWidget(group.element, row, 0)
         self.layout.addWidget(group.estimate, row, 1)

@@ -9,6 +9,13 @@ from PySide6.QtCore import (
 
 from Controllers.RangeController import RangeController
 
+class CustomToolbar(NavigationToolbar):
+    toolitems = [
+        ('Home', 'Reset view', 'home', 'home'),
+        ('Pan', 'Pan axes', 'move', 'pan'),
+        ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
+    ]
+
 class MplCanvas(FigureCanvas):
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):
@@ -36,14 +43,14 @@ class PlotInteractionController:
         self.sc.axes.set_xlim(x.min(), x.max())
         self.sc.axes.set_ylim(y.min(), y.max())
         
-        while self.plot_widget.count():
-            item = self.plot_widget.takeAt(0)
+        while self.plot_widget.layout().count():
+            item = self.plot_widget.layout().takeAt(0)
             widget = item.widget()
             if widget:
                 widget.deleteLater()
         
-        self.plot_widget.addWidget(self.sc)
-        #self.plot_widget.addWidget(NavigationToolbar(self.sc, self.plot_widget))
+        self.plot_widget.layout().addWidget(self.sc)
+        self.plot_widget.layout().addWidget(CustomToolbar(self.sc, self.plot_widget))
 
         self.activeController = None
         self.isDragging = False
