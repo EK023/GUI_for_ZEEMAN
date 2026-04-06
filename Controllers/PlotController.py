@@ -3,8 +3,12 @@ from matplotlib.widgets import SpanSelector
 from matplotlib.backends.backend_qtagg import FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
+from PySide6.QtWidgets import (
+    QWidget
+)
+
 from PySide6.QtCore import (
-    Qt, 
+    Qt, Signal
 )
 
 from Controllers.RangeController import RangeController
@@ -23,8 +27,11 @@ class MplCanvas(FigureCanvas):
         self.axes = self.fig.add_subplot(111)
         super().__init__(self.fig)
 
-class PlotInteractionController:
+class PlotInteractionController(QWidget):
+    openWaveRanges = Signal()
+
     def __init__(self, plot_widget, graph_ranges, controllers):
+        super().__init__()
         self.plot_widget = plot_widget
         self.graph_ranges = graph_ranges
         self.controllers = controllers
@@ -42,6 +49,7 @@ class PlotInteractionController:
         
         self.sc.axes.set_xlim(x.min(), x.max())
         self.sc.axes.set_ylim(y.min(), y.max())
+        self.openWaveRanges.emit()
         
         while self.plot_widget.layout().count():
             item = self.plot_widget.layout().takeAt(0)
@@ -50,7 +58,7 @@ class PlotInteractionController:
                 widget.deleteLater()
         
         self.plot_widget.layout().addWidget(self.sc)
-        self.plot_widget.layout().addWidget(CustomToolbar(self.sc, self.plot_widget))
+        self.plot_widget.layout().addWidget(NavigationToolbar(self.sc, self.plot_widget))
 
         self.activeController = None
         self.isDragging = False
@@ -80,16 +88,14 @@ class PlotInteractionController:
             self.activeController = None
             return
         self.isDragging = True
+        self.openWaveRanges.emit()
         # If a range is active → edit it
         if self.isDragging and self.activeController is not None:
             self.activeController.updatePatch(xmin, xmax)
             return
 
         # Otherwise → create a new range
-        controller = RangeController(self.sc.axes, self.graph_ranges, xmin, xmax)
-        controller.set_delete_callback(self.remove_controller)
-        self.controllers.append(controller)
-        self.activeController = controller
+        self.add_range(xmin, xmax)
     
     # That needs a fix doesn't work at all
     def on_motion(self, event):
@@ -137,3 +143,10 @@ class PlotInteractionController:
         self.controllers.remove(controller)
 
         self.sc.draw_idle()
+
+    def add_range(self, min_val, max_val, active=True):
+        controller = RangeController(self.sc.axes, self.graph_ranges, min_val, max_val)
+        controller.set_delete_callback(self.remove_controller)
+        self.controllers.append(controller)
+        if active:
+            self.activeController = controller

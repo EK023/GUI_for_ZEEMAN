@@ -53,6 +53,10 @@ class MainWindow(uiclass, baseclass):
 
         self.controllers = []
         self.plotInteraction = PlotInteractionController(self.plotArea, self.waveRangeContents.layout(), self.controllers)
+
+        self.plotInteraction.openWaveRanges.connect(lambda: self.rightPanel.setCurrentWidget(self.page_2))
+
+        self.addRangeButton.clicked.connect(lambda: self.plotInteraction.add_range(0, 0, active=False))
         
         self.selectPlottingFileButton.clicked.connect(self.selectFile)
 
@@ -68,6 +72,8 @@ class MainWindow(uiclass, baseclass):
         self.elementDropDown = DropDownMenu(self.SelectElements, self.elementData.keys())
 
         self.elementDropDown.popup.elementToggled.connect(self.handle_element_toggle)
+
+        self.elementTable.elementRemoved.connect(self.elementDropDown.popup.uncheck_element)
 
     def load_elements(self, filename):
         with open (filename) as f:
@@ -103,6 +109,8 @@ class MainWindow(uiclass, baseclass):
             
             self.fields[name] = fg
             layout.addWidget(fg)
+        
+        layout.setRowStretch(999, 1)
 
     
 

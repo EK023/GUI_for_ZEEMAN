@@ -1,15 +1,20 @@
 from PySide6.QtCore import (
-    Qt, 
+    Qt, Signal
 )
 from PySide6.QtWidgets import (
     QLabel,
+    QPushButton,
+    QWidget,
 )
 
 from Models.Elements import Elements
 from Rows.ElementRow import ElementRow
 
-class ElementTable:
+class ElementTable(QWidget):
+    elementRemoved = Signal(str)
+
     def __init__(self, layout):
+        super().__init__()
         self.layout = layout
         # layout.setAlignment(Qt.AlignTop)
         self.current_row = 1
@@ -35,11 +40,15 @@ class ElementTable:
 
         group = ElementRow(model)
 
+        delete_button = QPushButton("X")
+        delete_button.setMaximumWidth(20)
+        delete_button.clicked.connect(lambda _, e=element: self.remove_element(e))
 
         self.layout.addWidget(group.element, row, 0)
         self.layout.addWidget(group.estimate, row, 1)
         self.layout.addWidget(group.fit, row, 2, alignment=Qt.AlignCenter)
         self.layout.addWidget(group.iterlist, row, 3, alignment=Qt.AlignCenter)
+        self.layout.addWidget(delete_button, row, 4)
 
         self.rows[element] = group
         self.current_row += 1
@@ -49,6 +58,7 @@ class ElementTable:
             return
 
         del self.rows[element]
+        self.elementRemoved.emit(element)
 
         for i in reversed(range(self.layout.count())):
             item = self.layout.itemAt(i)
@@ -60,10 +70,14 @@ class ElementTable:
 
         self.current_row = 1
         for group in self.rows.values():
+            delete_button = QPushButton("X")
+            delete_button.setMaximumWidth(20)
+            delete_button.clicked.connect(lambda _, e=group: self.remove_element(e.element.text()))
             self.layout.addWidget(group.element, self.current_row, 0)
             self.layout.addWidget(group.estimate, self.current_row, 1)
             self.layout.addWidget(group.fit, self.current_row, 2, alignment=Qt.AlignCenter)
             self.layout.addWidget(group.iterlist, self.current_row, 3, alignment=Qt.AlignCenter)
+            self.layout.addWidget(delete_button, self.current_row, 4 )
 
             self.current_row += 1
 

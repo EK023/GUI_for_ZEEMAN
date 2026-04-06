@@ -56,13 +56,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="SelectElements">
-       <property name="text">
-        <string>SelectElements</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Orientation::Horizontal</enum>
@@ -126,6 +119,13 @@
        </attribute>
        <layout class="QVBoxLayout" name="elementsLayout">
         <item>
+      <widget class="QToolButton" name="SelectElements">
+       <property name="text">
+        <string>Select Elements</string>
+       </property>
+      </widget>
+     </item>
+        <item>
         <widget class="QScrollArea" name="elementsScrollArea">
             <property name="widgetResizable">
             <bool>true</bool>
@@ -168,6 +168,13 @@
                  </widget>
                 </widget>
                </item>
+               <item>
+      <widget class="QToolButton" name="addRangeButton">
+       <property name="text">
+        <string>Add range</string>
+       </property>
+      </widget>
+     </item>
               </layout>
       </widget>
       <widget class="QWidget" name="page_3">

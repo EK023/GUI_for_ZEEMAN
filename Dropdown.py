@@ -53,6 +53,10 @@ class MultiSelectPopup(QWidget):
         for el, cb in self.checkboxes.items():
             cb.setVisible(text in el.lower())
 
+    def uncheck_element(self, element):
+        if element in self.checkboxes:
+            self.checkboxes[element].setChecked(False)
+
 class DropDownMenu(QWidget):
 
     # Need to decide where the app is exactly when its used, maybe even let user conf the file location
