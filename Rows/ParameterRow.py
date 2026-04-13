@@ -6,7 +6,7 @@ from NumberValidator import NumericInput
 from Rows.BaseRow import BaseRow
 
 class ParameterRow(BaseRow):
-    def __init__(self, name, layout, row, text=0.0, checkbox=0,  with_text=True, with_checkbox=True):
+    def __init__(self, name, layout, row, text=0.0, checkbox=False,  with_text=True, with_checkbox=True):
         super().__init__(name)
 
         self.label = QLabel(name)
@@ -16,7 +16,7 @@ class ParameterRow(BaseRow):
         
         self.checkbox = QCheckBox() if with_checkbox else None
         if self.checkbox:
-            self.checkbox.setChecked(bool(checkbox))
+            self.checkbox.setChecked(checkbox)
 
         layout.addWidget(self.label, row, 0)
 
@@ -28,6 +28,6 @@ class ParameterRow(BaseRow):
 
     def get(self):
         return {
-            "enabled": +(self.checkbox.isChecked()) if self.checkbox else None,
+            "enabled": self.checkbox.isChecked() if self.checkbox else None,
             "value": self.input.text() if self.input else None,
         }

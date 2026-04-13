@@ -29,8 +29,6 @@ class ElementTable(QWidget):
             label = QLabel(text)
             self.layout.addWidget(label, 0, col )
 
-        # self.layout.
-
     def add_element(self, model: Elements):
         element = model.element
 
@@ -82,4 +80,4 @@ class ElementTable(QWidget):
             self.current_row += 1
 
     def to_dict(self):
-        return [group.get() for group in self.rows]
+        return [group.get() for group in self.rows.values()]

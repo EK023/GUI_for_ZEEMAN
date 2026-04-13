@@ -120,7 +120,6 @@ class MainWindow(uiclass, baseclass):
 
     def collect_values(self):
         results = {}
-        print(self.controllers, "controllers in collect values")
         for name, field in self.fields.items():
             results[name] = field.get()    
 
@@ -128,7 +127,6 @@ class MainWindow(uiclass, baseclass):
         for i, controller in enumerate(self.controllers):
             results[f"range_{i}"] = controller.get()
         
-        print(filename, "filename in collect values")
         results["obsspecpath"] = filename
         
 

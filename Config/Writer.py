@@ -8,7 +8,7 @@ class ConfigWriter:
 
     def handle_fit(self,key, value, config):
         val = float(value.get("value"))
-        enabled = value.get("enabled")
+        enabled = int(value.get("enabled"))
         config["Params"][f"{key},fit{key}"] = json.dumps([val, enabled])
 
 
@@ -17,7 +17,7 @@ class ConfigWriter:
 
 
     def handle_bool(self,key, value, config):
-        config["Params"][key.replace(" ", "_")] = json.dumps(value.get("enabled"))
+        config["Params"][key.replace(" ", "_")] = json.dumps(int(value.get("enabled")))
 
 
     def handle_int(self,key, value, config):
@@ -34,6 +34,16 @@ class ConfigWriter:
 
         wave_ranges.append([min_val, max_val])
 
+    def handle_elements(self, dict, elements, iterlist):
+        for value in dict:
+            el = value.get("element")
+            est = float(value.get("estimate"))
+            fit = int(value.get("fit"))
+            iter = value.get("iterlist")
+            if iter:
+                iterlist.append(el)
+            elements.append([el, est, fit])
+
     def write(self, data):
         fits = ["vr", "vsini", "vmic", "vmac", "teff", "logg", "metal"]
         string_keys = ["obsspecpath","mainpath", "vlinespath", "model atm folder"]
@@ -41,6 +51,8 @@ class ConfigWriter:
         int_keys = ["n iter", "contpoly", "res"]
         data["read_wave_from_text"] = data.pop("wave from text")
         handlers = {}
+        elements = []
+        iterlist = []
 
         for k in fits:
             handlers[k] = self.handle_fit
@@ -53,15 +65,15 @@ class ConfigWriter:
 
         for k in int_keys:
             handlers[k] = self.handle_int
+        handlers["elements"] = lambda key, value, config: self.handle_elements(value, elements, iterlist)
 
         config = configparser.ConfigParser(delimiters=(':'))
         config["Params"] = {}
 
         wave_ranges = []
-        elements = []
+        
 
         for key, value in data.items():
-
             if key.startswith("range_"):
                 self.handle_range(value, wave_ranges)
                 continue
@@ -73,54 +85,10 @@ class ConfigWriter:
 
         # sort the elements
         wave_ranges = sorted(wave_ranges, key=lambda x: x[0])
-        # elements = sorted(elements, key=lambda x: x[0])
-        config["Params"]["wave_range_lists"] = json.dumps(elements)
+        config["Params"]["elements"] = json.dumps(elements)
+        config["Params"]["iterlist"] = json.dumps([iterlist])
+        config["Params"]["wave_range_lists"] = json.dumps(wave_ranges)
+        
 
         with open(self.config_path, "w") as f:
             config.write(f)
-
-
-
-    # def write(self, data):
-    #     fits = ["vr", "vsini", "vmic", "vmac", "teff", "logg", "metal"]
-    #     string_keys = ["obsspecpath","mainpath", "vlinespath", "model atm folder"]
-    #     bool_keys = ["save file", "show plot", "read_wave_from_text"]
-    #     int_keys = ["n iter", "contpoly", "res"]
-    #     data["read_wave_from_text"] = data.pop("wave from text") 
-
-    #     config = configparser.ConfigParser(delimiters=(':'))
-
-    #     config['Params'] = {}
-    #     elements = []
-    #     for key, value in data.items():
-    #         if key in fits:
-    #             val = float(value.get("value"))
-    #             enabled = value.get("enabled")
-    #             config["Params"][f"{key},fit{key}"] = json.dumps([val, enabled])
-    #         elif key == "elements":
-    #             config["Params"]["elements"] = json.dumps(value)
-    #         elif key in string_keys:
-    #             config["Params"][key] = json.dumps(value)
-    #         elif key in bool_keys:
-    #             config["Params"][key.replace(" ", "_")] = json.dumps(value.get("enabled"))
-    #         elif key in int_keys:
-    #             val = int(round(float(value.get("value"))))
-    #             config["Params"][key.replace(" ", "_")] = json.dumps(val)
-    #         elif key.startswith("range_"):
-    #             min_val = float(data[key].get("min"))
-    #             max_val = float(data[key].get("max"))
-    #             if max_val - min_val > 200:
-    #                 newMax = min_val + 200
-    #                 while newMax < max_val:
-    #                     elements.append([min_val, newMax])
-    #                     min_val = newMax
-    #                     newMax = min_val + 200
-    #                 elements.append([min_val, max_val])
-    #             else:
-    #                 elements.append([min_val, max_val])
-
-    #     # sort the elements
-    #     elements = sorted(elements, key=lambda x: x[0])
-    #     config["Params"]["elements"] = json.dumps([elements]) # Check if the extra [] are needed
-    #     with open(self.config_path, 'w') as f:
-    #         config.write(f)
