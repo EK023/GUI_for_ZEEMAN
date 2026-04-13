@@ -46,7 +46,7 @@ class ConfigWriter:
 
     def write(self, data):
         fits = ["vr", "vsini", "vmic", "vmac", "teff", "logg", "metal"]
-        string_keys = ["obsspecpath","mainpath", "vlinespath", "model atm folder"]
+        string_keys = ["obsspecpath","mainpath", "vlinespath", "model atm folder", "run format"]
         bool_keys = ["save file", "show plot", "read_wave_from_text"]
         int_keys = ["n iter", "contpoly", "res"]
         data["read_wave_from_text"] = data.pop("wave from text")

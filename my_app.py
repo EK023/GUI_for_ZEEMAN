@@ -16,6 +16,7 @@ import pyqtgraph as pg
 from Models.Elements import Elements
 from Rows.ParameterRow import ParameterRow
 from Rows.FileSelectRow import FileSelectRow
+from Rows.ChoiceRow import ChoiceRow
 from Controllers.PlotController import PlotInteractionController
 from ElementTable import ElementTable
 from Dropdown import DropDownMenu
@@ -96,11 +97,11 @@ class MainWindow(uiclass, baseclass):
     def initiate_fields(self, layout):
         self.fields = {}
 
-        params = ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal", "contpoly", "n iter", "save file", "show plot", "wave from text", "mainpath", "vlinespath",  "model atm folder"]
+        params = ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal", "contpoly", "n iter", "save file", "show plot","run format", "wave from text", "mainpath", "vlinespath",  "model atm folder"]
 
         for name in params:
             row = params.index(name)
-            if name in ["res", "n iter", "contpoly"]:
+            if name in ["res", "n iter"]:
                 fg = ParameterRow(name, layout, row, with_checkbox=False)
             elif name in ["save file", "show plot", "wave from text"]:
                 fg = ParameterRow(name, layout, row, with_text=False, with_checkbox=True)
@@ -108,9 +109,11 @@ class MainWindow(uiclass, baseclass):
                 fg = FileSelectRow(name, layout, row)
             elif name == "model atm folder":
                 fg = FileSelectRow(name, layout, row, folder=True)
-            else:   
-                fg = ParameterRow(name, layout, row)
-            
+            elif name == "run format":
+                fg = ChoiceRow(name, layout, row, ["fit","syn"])
+            else:
+                fg = ParameterRow(name, layout, row)     
+                  
             self.fields[name] = fg
             layout.addWidget(fg)
         

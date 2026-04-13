@@ -72,9 +72,16 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="loadConfButton">
+       <property name="text">
+        <string>Load Configuration</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="saveConfButton">
        <property name="text">
-        <string>Save Configurations</string>
+        <string>Save Configuration</string>
        </property>
       </widget>
      </item>
