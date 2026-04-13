@@ -9,12 +9,12 @@ from Rows.BaseRow import BaseRow
 import os
 
 class FileSelectRow(BaseRow):
-    def __init__(self, name, layout, row, filename  = "not selected"):
+    def __init__(self, name, layout, row, filename  = "not selected", folder = False):
         super().__init__(name)
 
         self.parameter = name
         self.button = QPushButton(name)
-        self.button.clicked.connect(self.selectFile)
+        self.button.clicked.connect(self.selectFile if not folder else self.selectDirectory)
         self.fileName = filename
         shortenedFilename = filename.split("/")[-1]
         self.filePath = QLabel(shortenedFilename if len(shortenedFilename) < 20 else shortenedFilename[0:17] + "...")
@@ -23,9 +23,8 @@ class FileSelectRow(BaseRow):
         layout.addWidget(self.filePath, row, 1, 1, 2)
 
     def get(self):
-        return {
-            self.parameter: self.fileName
-        }
+        return self.fileName 
+
     
     def selectFile(self):
             global filename
@@ -39,3 +38,15 @@ class FileSelectRow(BaseRow):
                 self.fileName = filename
                 shortenedFilename = filename.split("/")[-1]
                 self.filePath.setText(shortenedFilename if len(shortenedFilename) < 20 else shortenedFilename[0:17] + "...")
+    
+    def selectDirectory(self):
+            global directory
+            directory = QFileDialog.getExistingDirectory(
+                self,
+                "Choose a directory",
+                ""
+            )
+            if directory:
+                self.fileName = directory
+                shortenedDirectory = directory.split("/")[-1]
+                self.filePath.setText(shortenedDirectory if len(shortenedDirectory) < 20 else shortenedDirectory[0:17] + "...")

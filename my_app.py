@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QApplication, 
     QFileDialog,
 )
-import json
+
 import numpy as np
 
 import pyqtgraph as pg
@@ -19,6 +19,8 @@ from Rows.FileSelectRow import FileSelectRow
 from Controllers.PlotController import PlotInteractionController
 from ElementTable import ElementTable
 from Dropdown import DropDownMenu
+from Config.Reader import ConfigReader
+from Config.Writer import ConfigWriter
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 
@@ -94,16 +96,18 @@ class MainWindow(uiclass, baseclass):
     def initiate_fields(self, layout):
         self.fields = {}
 
-        params = ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal", "save file", "show plot", "wave from text", "mainpath", "vlinespath", "contpoly", "n iter"]
+        params = ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal", "contpoly", "n iter", "save file", "show plot", "wave from text", "mainpath", "vlinespath",  "model atm folder"]
 
         for name in params:
             row = params.index(name)
-            if name in ["res", "n iter"]:
+            if name in ["res", "n iter", "contpoly"]:
                 fg = ParameterRow(name, layout, row, with_checkbox=False)
             elif name in ["save file", "show plot", "wave from text"]:
                 fg = ParameterRow(name, layout, row, with_text=False, with_checkbox=True)
-            elif name in ["mainpath", "vlinespath", "contpoly"]:
+            elif name in ["mainpath", "vlinespath"]:
                 fg = FileSelectRow(name, layout, row)
+            elif name == "model atm folder":
+                fg = FileSelectRow(name, layout, row, folder=True)
             else:   
                 fg = ParameterRow(name, layout, row)
             
@@ -122,13 +126,11 @@ class MainWindow(uiclass, baseclass):
 
         results["elements"] = self.elementTable.to_dict() # Probably want to use that in a better way
         for i, controller in enumerate(self.controllers):
-            print(controller.get(), "controller get", controller.xmin, controller.xmax)
-
             results[f"range_{i}"] = controller.get()
         
         print(filename, "filename in collect values")
-        results["file"] = filename
-
+        results["obsspecpath"] = filename
+        
 
         return results
         
@@ -146,11 +148,12 @@ class MainWindow(uiclass, baseclass):
         return super().event(event)
     
     def show_save_file_dialog(self,values):
-        file_name, _ = QFileDialog.getSaveFileName(window, 'Save File', '', 'Text Files (*.txt);;All Files (*)')
+        file_name, _ = QFileDialog.getSaveFileName(window, 'Save File', '','All Files (*) ;;Text Files (*.txt)') # can change default file formats
 
         if file_name:
-            with open(file_name, 'w') as file:
-                file.write(json.dumps(values))
+            self.config_writer = ConfigWriter(file_name, values)
+            # with open(file_name, 'w') as file:
+            #     file.write(json.dumps(values))
             print(f'Saved file: {file_name}')
 
     def save_data_to_file(self,):
