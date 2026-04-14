@@ -1,5 +1,6 @@
 import json
 import configparser
+from parameters import params, get_key
 
 class ConfigWriter:
     def __init__(self, config_path, data):
@@ -16,7 +17,6 @@ class ConfigWriter:
 
     def handle_bool(self,key, value, config):
         config["Params"][key.replace(" ", "_")] = json.dumps(int(value.get("enabled")))
-
 
     def handle_int(self,key, value, config):
         val = int(round(float(value.get("value"))))
@@ -43,28 +43,25 @@ class ConfigWriter:
             elements.append([el, est, fit])
 
     def write(self, data):
-        fits = ["vr", "vsini", "vmic", "vmac", "teff", "logg", "metal"]
-        string_keys = ["obsspecpath","mainpath", "vlinespath", "model atm folder", "run format"]
-        bool_keys = ["save file", "show plot", "read_wave_from_text"]
-        int_keys = ["n iter", "contpoly", "res"]
-        data["read_wave_from_text"] = data.pop("wave from text")
         handlers = {}
         elements = []
         iterlist = []
 
-        for k in fits:
-            handlers[k] = self.handle_fit
-
-        for k in string_keys:
-            handlers[k] = self.handle_string
-
-        for k in bool_keys:
-            handlers[k] = self.handle_bool
-
-        for k in int_keys:
-            handlers[k] = self.handle_int
+        for meta in params:
+            key = get_key(meta)
+            t = meta["type"]
+            match t:
+                case "fit":
+                    handlers[key] = self.handle_fit
+                case "file" | "choice":
+                    handlers[key] = self.handle_string
+                case "bool":
+                    handlers[key] = self.handle_bool
+                case "int" | "contpoly":
+                    handlers[key] = self.handle_int
+            
         handlers["elements"] = lambda key, value, config: self.handle_elements(value, elements, iterlist)
-
+        handlers["obsspecpath"] = self.handle_string
         config = configparser.ConfigParser(delimiters=(':'))
         config["Params"] = {}
 

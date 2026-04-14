@@ -13,6 +13,6 @@ class ConfigReader:
 
         for key in params:
             value = json.loads(params[key])
-            data[key] = value
+            data[key.split(",")[0]] = value
 
         return data

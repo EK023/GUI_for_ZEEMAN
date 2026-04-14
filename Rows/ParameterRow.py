@@ -31,8 +31,10 @@ class ParameterRow(BaseRow):
             "value": self.input.text() if self.input else None,
         }
     
-    def set(self, value, enabled):
-        if self.input:
-            self.input.setText(str(value))
-        if self.checkbox:
-            self.checkbox.setChecked(enabled)
+    def set(self, data):
+        if self.input is not None:
+            input = lambda data: data[0] if isinstance(data, list) else data
+            self.input.setText(str(input(data)))
+        if self.checkbox is not None:
+            checkbox = lambda data : data[1] if isinstance(data, list) else data
+            self.checkbox.setChecked(bool(checkbox(data)))

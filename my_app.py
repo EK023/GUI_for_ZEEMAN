@@ -22,25 +22,34 @@ from ElementTable import ElementTable
 from Dropdown import DropDownMenu
 from Config.Reader import ConfigReader
 from Config.Writer import ConfigWriter
+from parameters import params, get_key as get_params_key
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 
 class MainWindow(uiclass, baseclass):
+
     
     def selectFile(self):
-            global filename
-            filename, _ = QFileDialog.getOpenFileName(
-                self,
-                "Choose a data file",
-                "",
-                "All Files (*);;Data Files (*.csv *.txt *.json)"
-            )
-            if filename:
+        f, _ = QFileDialog.getOpenFileName(
+            self,
+            "Choose a data file",
+            "",
+            "All Files (*);;Data Files (*.csv *.txt *.json)"
+        )
+        if f:
+            return f
+    
+    def selectFileAndPlot(self):
+        filename = self.selectFile()
+        self.fileName = filename
+        self.filePathLabel.setText(filename)
+        self.plotInteraction.loadData(filename)
                 
-                self.fileName = filename
-                self.filePathLabel.setText(filename)
-                self.plotInteraction.loadData(filename)
-                
+    def plot_data(self, filename):
+        self.fileName = filename
+        self.filePathLabel.setText(filename)
+        self.plotInteraction.loadData(filename)
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -61,11 +70,12 @@ class MainWindow(uiclass, baseclass):
 
         self.addRangeButton.clicked.connect(lambda: self.plotInteraction.add_range(0, 0, active=False))
         
-        self.selectPlottingFileButton.clicked.connect(self.selectFile)
+        self.selectPlottingFileButton.clicked.connect(self.selectFileAndPlot)
 
         self.elementWidgets = []
         # self.addElementButton.clicked.connect(lambda: self.elementTable.add_row(Elements("",0.0)))
         self.saveConfButton.clicked.connect(self.save_data_to_file)
+        self.loadConfButton.clicked.connect(self.load_conf_from_file)
 
         self.initiate_fields(self.page_3.layout())
         self.elementTable = ElementTable(self.elementsContainer.layout())
@@ -92,33 +102,30 @@ class MainWindow(uiclass, baseclass):
             self.elementTable.add_element(Elements(element, self.elementData[element]))
         else:
             self.elementTable.remove_element(element)
-
-
+    
     def initiate_fields(self, layout):
         self.fields = {}
-
-        params = ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal", "contpoly", "n iter", "save file", "show plot","run format", "wave from text", "mainpath", "vlinespath",  "model atm folder"]
-
-        for row, name in enumerate(params):
-            if name in ["res", "n iter"]:
-                fg = ParameterRow(name, layout, row, with_checkbox=False)
-            elif name in ["save file", "show plot", "wave from text"]:
-                fg = ParameterRow(name, layout, row, with_text=False, with_checkbox=True)
-            elif name in ["vlinespath"]:
-                fg = FileSelectRow(name, layout, row)
-            elif name in ["model atm folder", "mainpath"]:
-                fg = FileSelectRow(name, layout, row, folder=True)
-            elif name == "run format":
-                fg = ChoiceRow(name, layout, row, ["fit","syn"])
-            else:
-                fg = ParameterRow(name, layout, row)     
+        for row, meta in enumerate(params):
+            display_name = meta["display"]
+            key = get_params_key(meta)
+            row_type = meta["type"]
+            
+            match row_type:
+                case "int":
+                    fg = ParameterRow(display_name, layout, row, with_checkbox=False)
+                case "bool":
+                    fg = ParameterRow(display_name, layout, row, with_text=False, with_checkbox=True)
+                case "file":
+                    fg = FileSelectRow(display_name, layout, row, folder=meta.get("folder", False)) # False is the fallback if there is no Folder
+                case "choice":
+                    fg = ChoiceRow(display_name, layout, row, meta.get("options"))
+                case _: #default at the moment 
+                    fg = ParameterRow(display_name, layout, row)     
                   
-            self.fields[name] = fg
+            self.fields[key] = fg
             layout.addWidget(fg)
         
         layout.setRowStretch(999, 1)
-
-    
 
     def collect_values(self):
         results = {}
@@ -129,11 +136,9 @@ class MainWindow(uiclass, baseclass):
         for i, controller in enumerate(self.controllers):
             results[f"range_{i}"] = controller.get()
         
-        results["obsspecpath"] = filename
+        results["obsspecpath"] = self.fileName
         
-
         return results
-        
     
     def add_elements_to_layout(self, layout, elements):
         for e in elements:
@@ -152,14 +157,21 @@ class MainWindow(uiclass, baseclass):
 
         if file_name:
             self.config_writer = ConfigWriter(file_name, values)
-            # with open(file_name, 'w') as file:
-            #     file.write(json.dumps(values))
-            print(f'Saved file: {file_name}')
 
     def save_data_to_file(self,):
         values = self.collect_values()
         print(values, "values in save data to file")
         self.show_save_file_dialog(values)
+
+    def load_conf_from_file(self):
+        filename = self.selectFile()
+        conf_reader = ConfigReader(filename)
+        data = conf_reader.read()
+        print(data)
+        for key, value in data.items():
+            if key in self.fields:
+                self.fields[key].set(value)
+        self.plot_data(data["obsspecpath"])
     
 app = QApplication(sys.argv)
 window = MainWindow()

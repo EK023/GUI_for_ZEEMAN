@@ -1,0 +1,25 @@
+
+params = [
+        {"display": "res", "type": "int"},
+        {"display": "vr", "type": "fit"},
+        {"display": "vsini", "type": "fit"},
+        {"display": "vmic", "type": "fit"},
+        {"display": "vmac", "type": "fit"},
+        {"display": "teff", "type": "fit"},
+        {"display": "logg", "type": "fit"},
+        {"display": "metal", "type": "fit"},
+        {"display": "contpoly", "type": "contpoly"},
+        {"display": "n iter", "type": "int"},
+        {"display": "save file", "type": "bool", "key": "savefile"}, # would be really nice to move to save_file and show_plot
+        {"display": "show plot", "type": "bool", "key": "showplot"},
+        {"display": "run format", "type": "choice", "options": ["fit","syn"]},
+        {"display": "wave from text", "type": "bool", "key": "read_wave_from_text"},
+        {"display": "mainpath", "type": "file", "folder": True},
+        {"display": "vlinespath", "type": "file"},
+        {"display": "model atm folder", "type": "file", "folder": True},
+
+    ]
+
+def get_key(row):
+    return row.get("key", row["display"].replace(" ", "_"))
+

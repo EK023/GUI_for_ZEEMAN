@@ -35,5 +35,5 @@ class ElementRow(BaseRow):
     def set(self, element, estimate, fit, iterlist):
         self.model.element = element
         self.model.estimate = estimate
-        self.model.fit = fit
-        self.model.iterlist = iterlist
+        self.model.fit = bool(fit)
+        self.model.iterlist = bool(iterlist)
