@@ -81,3 +81,10 @@ class ElementTable(QWidget):
 
     def to_dict(self):
         return [group.get() for group in self.rows.values()]
+    
+    def load_from_conf(self, element_list):
+        # remove all previously added elements
+        for el in self.rows.keys():
+            self.remove_element(el)
+        for el, est, fit, iter in element_list:
+            self.add_element(Elements(el, est, fit, iter))

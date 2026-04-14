@@ -150,3 +150,10 @@ class PlotInteractionController(QWidget):
         self.controllers.append(controller)
         if active:
             self.activeController = controller
+
+    def load_from_conf(self, range_list):
+        self.controllers = []
+        for min_val, max_val in range_list:
+            controller = RangeController(self.sc.axes, self.graph_ranges, min_val, max_val)
+            controller.set_delete_callback(self.remove_controller)
+            self.controllers.append(controller)

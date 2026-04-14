@@ -24,9 +24,16 @@ class RangeController:
         self._delete_callback = None
 
     def updatePatch(self, new_min, new_max):
+        rounded_min = round(new_min, 2)
+        rounded_max = round(new_max, 2)
+
         self.patch.set_x(new_min) 
         self.patch.set_width(new_max - new_min)
-        self.model.set_silent(round(new_min, 2), round(new_max, 2))
+
+        self.widget.min.setText(str(rounded_min))
+        self.widget.max.setText(str(rounded_max))
+        
+        self.model.set_silent(rounded_min, rounded_max)
         self.patch.figure.canvas.draw_idle()
 
     def containsPatch(self, patch):

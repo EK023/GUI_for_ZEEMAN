@@ -163,15 +163,50 @@ class MainWindow(uiclass, baseclass):
         print(values, "values in save data to file")
         self.show_save_file_dialog(values)
 
+    def merge_ranges(self, ranges):
+        if not ranges:
+            return []
+
+        merged = []
+        current_min, current_max = ranges[0]
+
+        for min_val, max_val in ranges[1:]:
+            if min_val == current_max:
+                # extend current range
+                current_max = max_val
+            else:
+                merged.append([current_min, current_max])
+                current_min, current_max = min_val, max_val
+
+        merged.append([current_min, current_max])
+        return merged
+    
+    def merge_element_data(self, elements, iterlist):
+        iter_set = set(iterlist[0]) if iterlist else set()
+
+        return [
+            [el, est, fit, int(el in iter_set)]
+            for el, est, fit in elements
+        ]
+
     def load_conf_from_file(self):
         filename = self.selectFile()
         conf_reader = ConfigReader(filename)
         data = conf_reader.read()
         print(data)
+         # contpoly has a weird thing at the moment, need to fix that
         for key, value in data.items():
             if key in self.fields:
                 self.fields[key].set(value)
         self.plot_data(data["obsspecpath"])
+
+        # Unite the split up wave ranges back to one big one if there are any
+        merged_wave_ranges = self.merge_ranges(data['wave_range_lists'])
+        self.plotInteraction.load_from_conf(merged_wave_ranges)
+
+        merged_elements = self.merge_element_data(data["elements"], data["iterlist"])
+        self.elementTable.load_from_conf(merged_elements)
+
     
 app = QApplication(sys.argv)
 window = MainWindow()
