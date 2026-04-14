@@ -24,7 +24,11 @@ class FileSelectRow(BaseRow):
 
     def get(self):
         return self.fileName 
-
+    
+    def set(self, filename):
+        self.fileName = filename
+        shortenedFilename = filename.split("/")[-1]
+        self.filePath.setText(shortenedFilename if len(shortenedFilename) < 20 else shortenedFilename[0:17] + "...")
     
     def selectFile(self):
             global filename

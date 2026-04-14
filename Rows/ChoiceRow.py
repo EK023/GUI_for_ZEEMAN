@@ -14,3 +14,8 @@ class ChoiceRow(BaseRow):
 
     def get(self):
         return self.combo.currentText()
+    
+    def set(self, selection):
+        index = self.combo.findText(selection)
+        if index != -1:
+            self.combo.setCurrentIndex(index)

@@ -11,10 +11,8 @@ class ConfigWriter:
         enabled = int(value.get("enabled"))
         config["Params"][f"{key},fit{key}"] = json.dumps([val, enabled])
 
-
     def handle_string(self, key, value, config):
         config["Params"][key.replace(" ", "_")] = json.dumps(value)
-
 
     def handle_bool(self,key, value, config):
         config["Params"][key.replace(" ", "_")] = json.dumps(int(value.get("enabled")))

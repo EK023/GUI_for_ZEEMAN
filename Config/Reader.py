@@ -6,5 +6,13 @@ class ConfigReader:
         self.config_path = config_path
 
     def read(self):
-        # Implement reading logic here
-        pass
+        config = configparser.ConfigParser(delimiters=(':'))
+        config.read(self.config_path)
+        params = config["Params"]
+        data = {}
+
+        for key in params:
+            value = json.loads(params[key])
+            data[key] = value
+
+        return data

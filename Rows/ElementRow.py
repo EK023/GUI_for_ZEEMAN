@@ -31,3 +31,9 @@ class ElementRow(BaseRow):
             "fit": self.fit.isChecked(),
             "iterlist": self.iterlist.isChecked(),
         }
+    
+    def set(self, element, estimate, fit, iterlist):
+        self.model.element = element
+        self.model.estimate = estimate
+        self.model.fit = fit
+        self.model.iterlist = iterlist

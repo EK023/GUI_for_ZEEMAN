@@ -6,9 +6,8 @@ from NumberValidator import NumericInput
 from Rows.BaseRow import BaseRow
 
 class ParameterRow(BaseRow):
-    def __init__(self, name, layout, row, text=0.0, checkbox=False,  with_text=True, with_checkbox=True):
+    def __init__(self, name, layout, row, text=0, checkbox=False,  with_text=True, with_checkbox=True):
         super().__init__(name)
-
         self.label = QLabel(name)
 
         self.input = NumericInput(text) if with_text else None
@@ -31,3 +30,9 @@ class ParameterRow(BaseRow):
             "enabled": self.checkbox.isChecked() if self.checkbox else None,
             "value": self.input.text() if self.input else None,
         }
+    
+    def set(self, value, enabled):
+        if self.input:
+            self.input.setText(str(value))
+        if self.checkbox:
+            self.checkbox.setChecked(enabled)

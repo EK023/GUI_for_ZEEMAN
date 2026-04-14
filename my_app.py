@@ -99,15 +99,14 @@ class MainWindow(uiclass, baseclass):
 
         params = ["res", "vr", "vsini", "vmic", "vmac", "teff", "logg", "metal", "contpoly", "n iter", "save file", "show plot","run format", "wave from text", "mainpath", "vlinespath",  "model atm folder"]
 
-        for name in params:
-            row = params.index(name)
+        for row, name in enumerate(params):
             if name in ["res", "n iter"]:
                 fg = ParameterRow(name, layout, row, with_checkbox=False)
             elif name in ["save file", "show plot", "wave from text"]:
                 fg = ParameterRow(name, layout, row, with_text=False, with_checkbox=True)
-            elif name in ["mainpath", "vlinespath"]:
+            elif name in ["vlinespath"]:
                 fg = FileSelectRow(name, layout, row)
-            elif name == "model atm folder":
+            elif name in ["model atm folder", "mainpath"]:
                 fg = FileSelectRow(name, layout, row, folder=True)
             elif name == "run format":
                 fg = ChoiceRow(name, layout, row, ["fit","syn"])
