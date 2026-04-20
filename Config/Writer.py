@@ -23,14 +23,13 @@ class ConfigWriter:
         config["Params"][key.replace(" ", "_")] = json.dumps(val)
 
     def handle_range(self, value, wave_ranges):
-        min_val = float(value.get("min"))
-        max_val = float(value.get("max"))
-        while max_val - min_val > 200:
-                new_max = min_val + 200
-                wave_ranges.append([min_val, new_max])
-                min_val = new_max
+        for min_val, max_val in value:
+            while max_val - min_val > 200:
+                    new_max = min_val + 200
+                    wave_ranges.append([min_val, new_max])
+                    min_val = new_max
 
-        wave_ranges.append([min_val, max_val])
+            wave_ranges.append([min_val, max_val])
 
     def handle_elements(self, dict, elements, iterlist):
         for value in dict:
@@ -46,36 +45,30 @@ class ConfigWriter:
         handlers = {}
         elements = []
         iterlist = []
+        wave_ranges = []
+
+        SAVE_HANDLERS = {
+            "fit": self.handle_fit,
+            "bool": self.handle_bool,
+            "int": self.handle_int,
+            "file": self.handle_string,
+            "choice": self.handle_string,
+            "hiddenFile": self.handle_string,
+            "ranges": lambda k, v, c: self.handle_range(v, wave_ranges),
+            "elements": lambda k, v, c: self.handle_elements(v, elements, iterlist),
+        }
+
+        config = configparser.ConfigParser(delimiters=(':'))
+        config["Params"] = {}
 
         for meta in params:
             key = get_key(meta)
             t = meta["type"]
-            match t:
-                case "fit":
-                    handlers[key] = self.handle_fit
-                case "file" | "choice":
-                    handlers[key] = self.handle_string
-                case "bool":
-                    handlers[key] = self.handle_bool
-                case "int" | "contpoly":
-                    handlers[key] = self.handle_int
-            
-        handlers["elements"] = lambda key, value, config: self.handle_elements(value, elements, iterlist)
-        handlers["obsspecpath"] = self.handle_string
-        config = configparser.ConfigParser(delimiters=(':'))
-        config["Params"] = {}
+            value = data.get(key)
 
-        wave_ranges = []
-        
+            handler = SAVE_HANDLERS.get(t)
 
-        for key, value in data.items():
-            if key.startswith("range_"):
-                self.handle_range(value, wave_ranges)
-                continue
-
-            handler = handlers.get(key)
-
-            if handler:
+            if handler and value is not None:
                 handler(key, value, config)
 
         # sort the elements

@@ -30,11 +30,11 @@ class MplCanvas(FigureCanvas):
 class PlotInteractionController(QWidget):
     openWaveRanges = Signal()
 
-    def __init__(self, plot_widget, graph_ranges, controllers):
+    def __init__(self, plot_widget, graph_ranges):
         super().__init__()
         self.plot_widget = plot_widget
         self.graph_ranges = graph_ranges
-        self.controllers = controllers
+        self.controllers = []
         self.activeController = None
         self.isDragging = False
 
@@ -157,3 +157,8 @@ class PlotInteractionController(QWidget):
             controller = RangeController(self.sc.axes, self.graph_ranges, min_val, max_val)
             controller.set_delete_callback(self.remove_controller)
             self.controllers.append(controller)
+
+    def get_ranges(self):
+        return [controller.get() for controller in self.controllers]
+
+    

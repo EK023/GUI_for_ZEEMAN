@@ -54,9 +54,6 @@ class RangeController:
         return self.model.max
 
     def get(self):
-        return {
-            "min": self.model.min,
-            "max": self.model.max,
-        }
+        return [self.model.min, self.model.max]
 
     

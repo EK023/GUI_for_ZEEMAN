@@ -8,7 +8,7 @@ params = [
         {"display": "teff", "type": "fit"},
         {"display": "logg", "type": "fit"},
         {"display": "metal", "type": "fit"},
-        {"display": "contpoly", "type": "contpoly"},
+        # {"display": "contpoly", "type": "contpoly"},
         {"display": "n iter", "type": "int"},
         {"display": "save file", "type": "bool", "key": "savefile"}, # would be really nice to move to save_file and show_plot
         {"display": "show plot", "type": "bool", "key": "showplot"},
@@ -17,6 +17,10 @@ params = [
         {"display": "mainpath", "type": "file", "folder": True},
         {"display": "vlinespath", "type": "file"},
         {"display": "model atm folder", "type": "file", "folder": True},
+        # they aren't actually displayed as ones before, more for the data handling when saving and loading data.
+        {"display": "ranges", "type": "ranges"}, 
+        {"display": "elements", "type": "elements"}, 
+        {"display": "obsspecpath", "type": "hiddenFile"}
 
     ]
 
