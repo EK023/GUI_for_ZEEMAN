@@ -12,6 +12,7 @@ from Rows.ElementRow import ElementRow
 
 class ElementTable(QWidget):
     elementRemoved = Signal(str)
+    elementAdded = Signal(str)
 
     def __init__(self, layout):
         super().__init__()
@@ -35,6 +36,7 @@ class ElementTable(QWidget):
         if element in self.rows:
             return
         row = self.current_row
+        self.elementAdded.emit(element)
 
         group = ElementRow(model)
 
@@ -79,12 +81,24 @@ class ElementTable(QWidget):
 
             self.current_row += 1
 
+    def clear(self):
+        print("clearing")
+        self.rows.clear()
+
+        for i in reversed(range(self.layout.count())):
+            item = self.layout.itemAt(i)
+            widget = item.widget()
+            if widget:
+                 widget.setParent(None)
+
+        self._init_headers()
+        self.current_row = 1
+
     def to_dict(self):
         return [group.get() for group in self.rows.values()]
     
     def load_from_conf(self, element_list):
         # remove all previously added elements
-        for el in self.rows.keys():
-            self.remove_element(el)
+        self.clear()
         for el, est, fit, iter in element_list:
             self.add_element(Elements(el, est, fit, iter))

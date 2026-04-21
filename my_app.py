@@ -40,14 +40,14 @@ class MainWindow(uiclass, baseclass):
         )
         if f:
             return f
-    
-    def selectFileAndPlot(self):
-        filename = self.selectFile()
-        self.fileName = filename
-        self.filePathLabel.setText(filename)
-        self.plotInteraction.loadData(filename)
                 
-    def plot_data(self, filename):
+    def plot_data(self, filename=False):
+        
+        if not filename :
+            filename = self.selectFile()
+        if self.fileName:
+            self.plotInteraction.clear_controllers()
+            # self.elementTable.clear() # not sure if elements should be cleared as well
         self.fileName = filename
         self.filePathLabel.setText(filename)
         self.plotInteraction.loadData(filename)
@@ -71,10 +71,10 @@ class MainWindow(uiclass, baseclass):
 
         self.addRangeButton.clicked.connect(lambda: self.plotInteraction.add_range(0, 0, active=False))
         
-        self.selectPlottingFileButton.clicked.connect(self.selectFileAndPlot)
+        self.selectPlottingFileButton.clicked.connect(self.plot_data)
 
         self.elementWidgets = []
-        # self.addElementButton.clicked.connect(lambda: self.elementTable.add_row(Elements("",0.0)))
+        self.fileName = None
         self.saveConfButton.clicked.connect(self.save_data_to_file)
         self.loadConfButton.clicked.connect(self.load_conf_from_file)
 
@@ -88,6 +88,7 @@ class MainWindow(uiclass, baseclass):
         self.elementDropDown.popup.elementToggled.connect(self.handle_element_toggle)
 
         self.elementTable.elementRemoved.connect(self.elementDropDown.popup.uncheck_element)
+        self.elementTable.elementAdded.connect(self.elementDropDown.popup.check_element)
 
     def load_elements(self, filename):
         with open (filename) as f:
@@ -120,8 +121,10 @@ class MainWindow(uiclass, baseclass):
                     fg = FileSelectRow(display_name, layout, row, folder=meta.get("folder", False)) # False is the fallback if there is no Folder
                 case "choice":
                     fg = ChoiceRow(display_name, layout, row, meta.get("options"))
+                case "fit": 
+                    fg = ParameterRow(display_name, layout, row)  
                 case _: #default at the moment 
-                    fg = ParameterRow(display_name, layout, row)     
+                    continue   
                   
             self.fields[key] = fg
             layout.addWidget(fg)
@@ -133,7 +136,7 @@ class MainWindow(uiclass, baseclass):
         for name, field in self.fields.items():
             results[name] = field.get()    
 
-        results["elements"] = self.elementTable.to_dict() # Probably want to use that in a better way
+        results["elements"] = self.elementTable.to_dict()
         results["ranges"] = self.plotInteraction.get_ranges()
         
         results["obsspecpath"] = self.fileName

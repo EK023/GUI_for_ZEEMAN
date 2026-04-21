@@ -151,6 +151,11 @@ class PlotInteractionController(QWidget):
         if active:
             self.activeController = controller
 
+    def clear_controllers(self):
+        print("removing")
+        for controller in self.controllers:
+            self.remove_controller(controller)
+
     def load_from_conf(self, range_list):
         self.controllers = []
         for min_val, max_val in range_list:

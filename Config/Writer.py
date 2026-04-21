@@ -22,14 +22,23 @@ class ConfigWriter:
         val = int(round(float(value.get("value"))))
         config["Params"][key.replace(" ", "_")] = json.dumps(val)
 
-    def handle_range(self, value, wave_ranges):
+    def handle_range(self, value, wave_range_lists):
+        wave_ranges = []
+        fortran_window_size = 10
+        fortran_max_allowed_range = 200
         for min_val, max_val in value:
-            while max_val - min_val > 200:
-                    new_max = min_val + 200
+            while max_val - min_val > fortran_max_allowed_range:
+                    new_max = min_val + fortran_max_allowed_range
                     wave_ranges.append([min_val, new_max])
                     min_val = new_max
 
             wave_ranges.append([min_val, max_val])
+        # sort the elements
+        wave_ranges = sorted(wave_ranges, key=lambda x: x[0])
+        for i in range(0, len(wave_ranges), fortran_window_size):
+            wave_range_lists.append(wave_ranges[i:i+fortran_window_size])
+
+
 
     def handle_elements(self, dict, elements, iterlist):
         for value in dict:
@@ -42,10 +51,9 @@ class ConfigWriter:
             elements.append([el, est, fit])
 
     def write(self, data):
-        handlers = {}
         elements = []
         iterlist = []
-        wave_ranges = []
+        wave_range_lists = []
 
         SAVE_HANDLERS = {
             "fit": self.handle_fit,
@@ -54,7 +62,7 @@ class ConfigWriter:
             "file": self.handle_string,
             "choice": self.handle_string,
             "hiddenFile": self.handle_string,
-            "ranges": lambda k, v, c: self.handle_range(v, wave_ranges),
+            "ranges": lambda k, v, c: self.handle_range(v, wave_range_lists),
             "elements": lambda k, v, c: self.handle_elements(v, elements, iterlist),
         }
 
@@ -71,11 +79,9 @@ class ConfigWriter:
             if handler and value is not None:
                 handler(key, value, config)
 
-        # sort the elements
-        wave_ranges = sorted(wave_ranges, key=lambda x: x[0])
         config["Params"]["elements"] = json.dumps(elements)
         config["Params"]["iterlist"] = json.dumps([iterlist])
-        config["Params"]["wave_range_lists"] = json.dumps(wave_ranges)
+        config["Params"]["wave_range_lists"] = json.dumps(wave_range_lists)
         
 
         with open(self.config_path, "w") as f:

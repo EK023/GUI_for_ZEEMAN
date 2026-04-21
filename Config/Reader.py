@@ -8,9 +8,12 @@ class ConfigReader:
     def merge_ranges(self, ranges):
         if not ranges:
             return []
-
+        # make one big list from list of multiple lists
+        if isinstance(ranges[0][0], list):
+            ranges = [r for group in ranges for r in group]
+        # sort the list
+        ranges = sorted(ranges, key=lambda x: x[0])
         merged = []
-        print( ranges[0], "first")
         current_min, current_max = ranges[0]
 
         for min_val, max_val in ranges[1:]:
@@ -37,7 +40,6 @@ class ConfigReader:
         data = {}
 
         for key in params:
-            # print(f"RAW VALUE: '{key}'", params)
             value = json.loads(params[key]) if params[key] else []
             data[key.split(",")[0]] = value
 
