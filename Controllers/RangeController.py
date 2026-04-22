@@ -7,9 +7,8 @@ class RangeController:
 
         self.patch = axes.axvspan(
             xmin, xmax,
-            alpha=0.2,
             picker=True,
-            color="tab:blue"
+            color=(0.12, 0.5, 0.71, 0.3)
         )
 
         layout.takeAt(layout.count()-1)

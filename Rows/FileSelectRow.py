@@ -1,12 +1,9 @@
 from PySide6.QtWidgets import (
-    QHBoxLayout,
     QFileDialog,
     QPushButton,
     QLabel,
 )
 from Rows.BaseRow import BaseRow
-
-import os
 
 class FileSelectRow(BaseRow):
     def __init__(self, name, layout, row, filename  = "not selected", folder = False):
@@ -34,7 +31,7 @@ class FileSelectRow(BaseRow):
             global filename
             filename, _ = QFileDialog.getOpenFileName(
                 self,
-                "Choose a data file",
+                f"Choose {self.parameter} file",
                 "",
                 "All Files (*);;Data Files (*.csv *.txt *.json)"
             )
@@ -47,7 +44,7 @@ class FileSelectRow(BaseRow):
             global directory
             directory = QFileDialog.getExistingDirectory(
                 self,
-                "Choose a directory",
+                f"Choose a {self.parameter} directory",
                 ""
             )
             if directory:

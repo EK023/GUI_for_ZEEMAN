@@ -31,20 +31,20 @@ uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 class MainWindow(uiclass, baseclass):
 
     
-    def selectFile(self):
+    def selectFile(self, name):
         f, _ = QFileDialog.getOpenFileName(
             self,
-            "Choose a data file",
+            f"Choose a {name} file",
             "",
             "All Files (*);;Data Files (*.csv *.txt *.json)"
         )
         if f:
             return f
                 
-    def plot_data(self, filename=False):
+    def plot_data(self, name=False, filename=False):
         
         if not filename :
-            filename = self.selectFile()
+            filename = self.selectFile(name)
         if self.fileName:
             self.plotInteraction.clear_controllers()
             # self.elementTable.clear() # not sure if elements should be cleared as well
@@ -71,7 +71,7 @@ class MainWindow(uiclass, baseclass):
 
         self.addRangeButton.clicked.connect(lambda: self.plotInteraction.add_range(0, 0, active=False))
         
-        self.selectPlottingFileButton.clicked.connect(self.plot_data)
+        self.selectPlottingFileButton.clicked.connect(lambda: self.plot_data("spectrum"))
 
         self.elementWidgets = []
         self.fileName = None
@@ -169,14 +169,14 @@ class MainWindow(uiclass, baseclass):
         self.show_save_file_dialog(values)
 
     def load_conf_from_file(self):
-        filename = self.selectFile()
+        filename = self.selectFile("configuration")
         conf_reader = ConfigReader(filename)
         data = conf_reader.read()
         for key, value in data.items():
             if key in self.fields:
                 self.fields[key].set(value)
 
-        self.plot_data(data["obsspecpath"])
+        self.plot_data(filename=data["obsspecpath"])
 
         self.plotInteraction.load_from_conf(data['wave_range_lists'])
         self.elementTable.load_from_conf(data["elements"])

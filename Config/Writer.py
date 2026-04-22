@@ -24,7 +24,7 @@ class ConfigWriter:
 
     def handle_range(self, value, wave_range_lists):
         wave_ranges = []
-        fortran_window_size = 10
+        fortran_window_size = 10 # Might move all of this to some single location
         fortran_max_allowed_range = 200
         for min_val, max_val in value:
             while max_val - min_val > fortran_max_allowed_range:

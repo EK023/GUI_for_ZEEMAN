@@ -29,6 +29,8 @@ class MplCanvas(FigureCanvas):
 
 class PlotInteractionController(QWidget):
     openWaveRanges = Signal()
+    DEFAULT_COLOR = (0.12, 0.5, 0.71, 0.3)
+    ACTIVE_COLOR  = (0.12, 0.5, 0.71, 0.7)
 
     def __init__(self, plot_widget, graph_ranges):
         super().__init__()
@@ -70,7 +72,7 @@ class PlotInteractionController(QWidget):
             "horizontal",
             useblit=False,
             grab_range=20, # Check if that helps anything....
-            props=dict(alpha=0.4, facecolor="tab:blue"), # can change color 
+            props=dict(alpha=0.3, facecolor="tab:blue"), # can change color 
             interactive=True,
             handle_props={"mouseover":True},
             drag_from_anywhere=False
@@ -86,11 +88,12 @@ class PlotInteractionController(QWidget):
     def onselect(self,xmin, xmax):
         if xmin == xmax:
             self.activeController = None
+             # If you select range then it activeController is practically immediately overridden to None and that breaks the logic
             return
         self.isDragging = True
         self.openWaveRanges.emit()
-        # If a range is active → edit it
-        if self.isDragging and self.activeController is not None:
+        if self.activeController is not None:
+            self.reset_patch_colors()
             self.activeController.updatePatch(xmin, xmax)
             return
 
@@ -117,30 +120,48 @@ class PlotInteractionController(QWidget):
 
     def onPick(self, event):
         patch = event.artist
+        selected = None
+        self.reset_patch_colors()
+
+        # First: find which controller was picked
         for controller in self.controllers:
             if controller.containsPatch(patch):
-                self.activeController = controller
+                selected = controller
+                break
 
-                controller.patch.set_alpha(0.6)
+        if selected:
+            self.activeController = selected
+            selected.patch.set_facecolor(self.ACTIVE_COLOR)
+            selected.patch.set_edgecolor("tab:blue")
 
-                self.span.extents = (controller.model.min, controller.model.max)
-                self.span.set_active(True)
+            self.span.extents = (selected.model.min, selected.model.max)
+            self.span.set_active(True)
 
-                controller.widget.min.setText(str(controller.model.min))
-                controller.widget.max.setText(str(controller.model.max))
-
-            else:
-                controller.patch.set_alpha(0.3)
-                controller.patch.set_edgecolor("none")
+            selected.widget.min.setText(str(selected.model.min))
+            selected.widget.max.setText(str(selected.model.max))
+        else:
+            self.activeController = None
+            self.span.set_active(False)
 
         self.sc.draw_idle()
 
-    def remove_controller(self, controller):
-        controller.patch.remove()
+    def reset_patch_colors(self):
+        for controller in self.controllers:
+            controller.patch.set_facecolor(self.DEFAULT_COLOR)
+            controller.patch.set_edgecolor("none")
 
+    def remove_controller(self, controller):
+        if self.activeController is controller:
+            self.activeController = None
+            self.span.set_active(False)
+            self.span.extents = (0, 0)
+            self.reset_patch_colors()
+
+        controller.patch.remove()
         controller.widget.setParent(None)
 
-        self.controllers.remove(controller)
+        if controller in self.controllers:
+            self.controllers.remove(controller)
 
         self.sc.draw_idle()
 
@@ -152,7 +173,6 @@ class PlotInteractionController(QWidget):
             self.activeController = controller
 
     def clear_controllers(self):
-        print("removing")
         for controller in self.controllers:
             self.remove_controller(controller)
 

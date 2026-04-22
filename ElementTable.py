@@ -82,7 +82,6 @@ class ElementTable(QWidget):
             self.current_row += 1
 
     def clear(self):
-        print("clearing")
         self.rows.clear()
 
         for i in reversed(range(self.layout.count())):
