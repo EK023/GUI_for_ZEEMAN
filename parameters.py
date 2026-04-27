@@ -17,6 +17,7 @@ params = [
         {"display": "mainpath", "type": "file", "folder": True},
         {"display": "vlinespath", "type": "file"},
         {"display": "model atm folder", "type": "file", "folder": True},
+        {"display": "model atm file", "type": "file"},
         # they aren't actually displayed as ones before, more for the data handling when saving and loading data.
         {"display": "ranges", "type": "ranges"}, 
         {"display": "elements", "type": "elements"}, 

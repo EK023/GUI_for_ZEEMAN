@@ -28,8 +28,14 @@ class RangeRow(BaseRow):
 
         self.delete_button.clicked.connect(self.deleteRequest.emit)
 
-        self.min.textChanged.connect(lambda text: setattr(self.model, 'min', float(text.replace(",", "."))))
-        self.max.textChanged.connect(lambda text: setattr(self.model, 'max', float(text.replace(",", "."))))
+        self.min.editingFinished.connect(self.on_min_changed)
+        self.max.editingFinished.connect(self.on_max_changed)
+
+    def on_min_changed(self):
+        self.model.min = float(self.min.text())
+    
+    def on_max_changed(self):
+        self.model.max = float(self.max.text())
 
     def get(self):
         return [self.min.text(), self.max.text()]

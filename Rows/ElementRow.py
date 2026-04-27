@@ -19,7 +19,7 @@ class ElementRow(BaseRow):
         self.iterlist = QCheckBox()
         self.iterlist.setChecked(model.iterlist)
 
-        self.estimate.textChanged.connect(lambda text: setattr(self.model, 'estimate', float(text.replace(",", "."))))
+        self.estimate.editingFinished.connect(self.update_estimate)
         self.fit.stateChanged.connect(lambda state: setattr(self.model, 'fit', bool(state)))
         self.iterlist.stateChanged.connect(lambda state: setattr(self.model, 'iterlist', bool(state)))
 
@@ -31,6 +31,10 @@ class ElementRow(BaseRow):
             "fit": self.fit.isChecked(),
             "iterlist": self.iterlist.isChecked(),
         }
+    
+    def update_estimate(self):
+        self.model.estimate = float(self.estimate.text())
+    
     
     def set(self, element, estimate, fit, iterlist):
         self.model.element = element

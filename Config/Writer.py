@@ -8,7 +8,10 @@ class ConfigWriter:
         self.write(data)
 
     def handle_fit(self,key, value, config):
-        val = float(value.get("value"))
+        try:
+            val = float(value.get("value"))
+        except (ValueError, TypeError):
+            val = 0
         enabled = int(value.get("enabled"))
         config["Params"][f"{key},fit{key}"] = json.dumps([val, enabled])
 
@@ -19,7 +22,10 @@ class ConfigWriter:
         config["Params"][key.replace(" ", "_")] = json.dumps(int(value.get("enabled")))
 
     def handle_int(self,key, value, config):
-        val = int(round(float(value.get("value"))))
+        try:
+            val = int(round(float(value.get("value"))))
+        except (ValueError, TypeError):
+            val = 0
         config["Params"][key.replace(" ", "_")] = json.dumps(val)
 
     def handle_range(self, value, wave_range_lists):

@@ -30,7 +30,8 @@ class MplCanvas(FigureCanvas):
 class PlotInteractionController(QWidget):
     openWaveRanges = Signal()
     DEFAULT_COLOR = (0.12, 0.5, 0.71, 0.3)
-    ACTIVE_COLOR  = (0.12, 0.5, 0.71, 0.7)
+    ACTIVE_COLOR  = (0.12, 0.5, 0.71, 0.5)
+    EDGE_THRESHOLD = 6 # pixels
 
     def __init__(self, plot_widget, graph_ranges):
         super().__init__()
@@ -38,7 +39,9 @@ class PlotInteractionController(QWidget):
         self.graph_ranges = graph_ranges
         self.controllers = []
         self.activeController = None
+        self.dragMode = None
         self.isDragging = False
+        self.clicked_empty_space = False
 
     def loadData(self, filename):
         data = np.loadtxt(filename, usecols=(0, 1))
@@ -60,19 +63,21 @@ class PlotInteractionController(QWidget):
                 widget.deleteLater()
         
         self.plot_widget.layout().addWidget(self.sc)
-        self.plot_widget.layout().addWidget(NavigationToolbar(self.sc, self.plot_widget))
+        self.toolbar = NavigationToolbar(self.sc, self.plot_widget)
+        self.plot_widget.layout().addWidget(self.toolbar)
 
         self.activeController = None
         self.isDragging = False
         self.sc.fig.canvas.mpl_connect("button_release_event", lambda e: setattr(self, "isDragging", False))
+        self.sc.fig.canvas.mpl_connect("button_press_event", self.on_press)
 
         self.span = SpanSelector(
             self.sc.axes,
             self.onselect,
             "horizontal",
             useblit=False,
-            grab_range=20, # Check if that helps anything....
-            props=dict(alpha=0.3, facecolor="tab:blue"), # can change color 
+            grab_range=self.EDGE_THRESHOLD, # Check if that helps anything....
+            props=dict(facecolor=self.ACTIVE_COLOR), # can change color 
             interactive=True,
             handle_props={"mouseover":True},
             drag_from_anywhere=False
@@ -80,70 +85,155 @@ class PlotInteractionController(QWidget):
 
         self.sc.fig.canvas.mpl_connect("motion_notify_event", self.on_motion)
 
-        self.sc.fig.canvas.mpl_connect('pick_event', self.onPick)
+    def on_press(self, event):
+        self.ignoreNextSelect = False
+
+        if event.dblclick:
+            self.ignoreNextSelect = True
+            return
+        
+        if event.x is None or event.xdata is None or event.inaxes != self.sc.axes:
+            return
+        
+        xpix = event.x
+        clicked_controller = None
+        edge_hit = False
+
+        # 1. Check if we clicked on the RESIZE EDGE of ANY existing controller
+        for controller in self.controllers:
+            cmin_pix = self.sc.axes.transData.transform((controller.xmin, 0))[0]
+            cmax_pix = self.sc.axes.transData.transform((controller.xmax, 0))[0]
+            
+            if abs(xpix - cmin_pix) <= self.EDGE_THRESHOLD or abs(xpix - cmax_pix) <= self.EDGE_THRESHOLD:
+                clicked_controller = controller
+                edge_hit = True
+                break
+
+        # 2. If not an edge, check if we clicked dead-center INSIDE ANY existing controller
+        if not clicked_controller:
+            for controller in self.controllers:
+                if controller.xmin <= event.xdata <= controller.xmax:
+                    clicked_controller = controller
+                    break
+
+        if clicked_controller is not None:
+            # Activate the controller we just hit
+            self.clicked_empty_space = False
+            self.set_active_controller(clicked_controller)
+            
+            if edge_hit:
+                self.dragMode = "edit"
+            else:
+                self.dragMode = "create" 
+            return
+
+        # 3. Clicked completely empty space
+        self.clicked_empty_space = True
+        self.clear_selection()
+        self.dragMode = "create"
+
+    def set_active_controller(self, controller):
+        if self.activeController == controller:
+            return
+            
+        self.reset_patch_colors()
+        self.activeController = controller
+        
+        controller.patch.set_facecolor(self.ACTIVE_COLOR)
+        controller.patch.set_edgecolor("tab:blue")
+
+        # Give the span selector the exact dimensions to take over for dragging
+        self.span.extents = (controller.model.min, controller.model.max)
+        self.span.set_active(True)
+
+        if hasattr(controller, 'widget') and controller.widget:
+            controller.widget.min.setText(str(controller.model.min))
+            controller.widget.max.setText(str(controller.model.max))
+
+        self.sc.draw_idle()
     
     def setupInteractions(self):
         ...
     
-    def onselect(self,xmin, xmax):
-        if xmin == xmax:
-            self.activeController = None
-             # If you select range then it activeController is practically immediately overridden to None and that breaks the logic
-            return
-        self.isDragging = True
-        self.openWaveRanges.emit()
-        if self.activeController is not None:
-            self.reset_patch_colors()
-            self.activeController.updatePatch(xmin, xmax)
+    def onselect(self, xmin, xmax):
+        if getattr(self, "ignoreNextSelect", False):
+            self.ignoreNextSelect = False
             return
 
-        # Otherwise → create a new range
+        if xmin == xmax:
+            if self.clicked_empty_space:
+                self.clear_selection()
+            elif self.activeController is not None:
+                # If user just single-clicked the center, SpanSelector internally collapses to 0, here we restore it
+                self.span.extents = (self.activeController.model.min, self.activeController.model.max)
+                self.span.set_active(True)
+            return
+        
+        
+        if self.range_exists(xmin, xmax):
+            return
+
+        self.openWaveRanges.emit()
+
+        if self.dragMode == "edit" and self.activeController is not None:
+            self.reset_patch_colors()
+            self.activeController.updatePatch(xmin, xmax)
+            self.activeController.patch.set_facecolor(self.ACTIVE_COLOR)
+            self.activeController.patch.set_edgecolor("tab:blue")
+            return
+
+        self.reset_patch_colors()
         self.add_range(xmin, xmax)
+        self.activeController.patch.set_facecolor(self.ACTIVE_COLOR)
+        self.activeController.patch.set_edgecolor("tab:blue")
+
+    def range_exists(self, xmin, xmax, tol=1e-6):
+        for controller in self.controllers:
+            cmin, cmax = controller.get()
+            if abs(cmin - xmin) < tol and abs(cmax - xmax) < tol:
+                return True
+        return False
     
-    # That needs a fix doesn't work at all
+    def clear_selection(self):
+        self.activeController = None
+        self.span.extents = (0, 0)
+        self.reset_patch_colors()
+        self.sc.fig.canvas.setCursor(Qt.ArrowCursor)
+        self.sc.draw_idle()
+    
     def on_motion(self, event):
-        if self.activeController is None:
+        # doesn't interfere with matplotlib's pan or zoom tools
+        if self.sc.widgetlock.locked():
+            return
+        
+        if self.activeController is None or event.x is None or event.inaxes != self.sc.axes:
+            if self.activeController is not None and self.activeController.patch.get_linewidth() != 0:
+                self.sc.fig.canvas.setCursor(Qt.ArrowCursor)
+                self.activeController.patch.set_linewidth(0)
+                self.sc.draw_idle()
             return
 
         xmin = self.activeController.xmin
         xmax = self.activeController.xmax
 
-        # Convert data coords to pixels
         xpix = event.x
         xmin_pix = self.sc.axes.transData.transform((xmin, 0))[0]
         xmax_pix = self.sc.axes.transData.transform((xmax, 0))[0]
 
-        if abs(xpix - xmin_pix) < 8 or abs(xpix - xmax_pix) < 8:
-            self.sc.fig.canvas.setCursor(Qt.SizeHorCursor)
+        near_left = abs(xpix - xmin_pix) <= self.EDGE_THRESHOLD
+        near_right = abs(xpix - xmax_pix) <= self.EDGE_THRESHOLD
+
+        if near_left or near_right:
+            if self.activeController.patch.get_linewidth() != 3:
+                self.sc.fig.canvas.setCursor(Qt.SizeHorCursor)
+                self.activeController.patch.set_linewidth(3)
+                self.sc.draw_idle()
+
         else:
-            self.sc.fig.canvas.setCursor(Qt.ArrowCursor)
-
-    def onPick(self, event):
-        patch = event.artist
-        selected = None
-        self.reset_patch_colors()
-
-        # First: find which controller was picked
-        for controller in self.controllers:
-            if controller.containsPatch(patch):
-                selected = controller
-                break
-
-        if selected:
-            self.activeController = selected
-            selected.patch.set_facecolor(self.ACTIVE_COLOR)
-            selected.patch.set_edgecolor("tab:blue")
-
-            self.span.extents = (selected.model.min, selected.model.max)
-            self.span.set_active(True)
-
-            selected.widget.min.setText(str(selected.model.min))
-            selected.widget.max.setText(str(selected.model.max))
-        else:
-            self.activeController = None
-            self.span.set_active(False)
-
-        self.sc.draw_idle()
+            if self.activeController.patch.get_linewidth() != 0:
+                self.sc.fig.canvas.setCursor(Qt.ArrowCursor)
+                self.activeController.patch.set_linewidth(0)
+                self.sc.draw_idle()
 
     def reset_patch_colors(self):
         for controller in self.controllers:
@@ -152,10 +242,7 @@ class PlotInteractionController(QWidget):
 
     def remove_controller(self, controller):
         if self.activeController is controller:
-            self.activeController = None
-            self.span.set_active(False)
-            self.span.extents = (0, 0)
-            self.reset_patch_colors()
+            self.clear_selection()
 
         controller.patch.remove()
         controller.widget.setParent(None)

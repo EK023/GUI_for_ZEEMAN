@@ -31,7 +31,7 @@ class FileSelectRow(BaseRow):
             global filename
             filename, _ = QFileDialog.getOpenFileName(
                 self,
-                f"Choose {self.parameter} file",
+                f"Choose '{self.parameter}' file",
                 "",
                 "All Files (*);;Data Files (*.csv *.txt *.json)"
             )
@@ -44,7 +44,7 @@ class FileSelectRow(BaseRow):
             global directory
             directory = QFileDialog.getExistingDirectory(
                 self,
-                f"Choose a {self.parameter} directory",
+                f"Choose a '{self.parameter}' directory",
                 ""
             )
             if directory:
