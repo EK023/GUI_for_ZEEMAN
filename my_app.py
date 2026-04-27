@@ -23,8 +23,8 @@ from Dropdown import DropDownMenu
 from Config.Reader import ConfigReader
 from Config.Writer import ConfigWriter
 from parameters import params, get_key as get_params_key
-sys.path.insert(0, "..") # Extra hacky lol, figure out a better way to connect the 2
-from Egert import zeeman_python
+# sys.path.insert(0, "..") # Extra hacky lol, figure out a better way to connect the 2
+# from Egert import zeeman_python
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 
@@ -161,7 +161,7 @@ class MainWindow(uiclass, baseclass):
         if file_name:
             self.config_writer = ConfigWriter(file_name, values)
 
-        zeeman_python.run(file_name)
+        # zeeman_python.run(file_name)
 
     def save_data_to_file(self,):
         values = self.collect_values()

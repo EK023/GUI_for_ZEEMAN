@@ -1,0 +1,6 @@
+matplotlib==3.5.1
+numpy==1.21.5
+pyqtgraph==0.13.7
+pyside6==6.10.0
+pyside6_addons==6.10.0
+pyside6_essentials==6.10.0
