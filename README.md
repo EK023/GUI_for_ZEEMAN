@@ -12,5 +12,5 @@ It is needed to load in the default abundances for the elements
 
 * Navigate to the folder where the code was installed and run it from terminal
 ```
-python3 my_app.py
+python3 GUI_zeeman.py
 ```
