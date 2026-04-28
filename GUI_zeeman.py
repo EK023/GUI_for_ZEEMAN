@@ -1,16 +1,8 @@
 import sys
-from PySide6.QtCore import (
-    QEvent, 
-    Qt, 
-    QEvent,
-)
-from PySide6.QtWidgets import (
-    QApplication, 
-    QFileDialog,
-)
+from PySide6.QtCore import QEvent, Qt, QEvent
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 import numpy as np
-
 import pyqtgraph as pg
 
 from Models.Elements import Elements
@@ -23,8 +15,7 @@ from Dropdown import DropDownMenu
 from Config.Reader import ConfigReader
 from Config.Writer import ConfigWriter
 from parameters import params, get_key as get_params_key
-# sys.path.insert(0, "..") # Extra hacky lol, figure out a better way to connect the 2
-# from Egert import zeeman_python
+from Zeeman import zeeman_python
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 
@@ -77,6 +68,7 @@ class MainWindow(uiclass, baseclass):
         self.fileName = None
         self.saveConfButton.clicked.connect(self.save_data_to_file)
         self.loadConfButton.clicked.connect(self.load_conf_from_file)
+        self.helpButton.clicked.connect(self.show_help_dialog)
 
         self.initiate_fields(self.page_3.layout())
         self.elementTable = ElementTable(self.elementsContainer.layout())
@@ -161,7 +153,7 @@ class MainWindow(uiclass, baseclass):
         if file_name:
             self.config_writer = ConfigWriter(file_name, values)
 
-        # zeeman_python.run(file_name)
+        zeeman_python.run(file_name)
 
     def save_data_to_file(self,):
         values = self.collect_values()
@@ -180,6 +172,29 @@ class MainWindow(uiclass, baseclass):
 
         self.plotInteraction.load_from_conf(data['wave_range_lists'])
         self.elementTable.load_from_conf(data["elements"])
+
+    def show_help_dialog(self):
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Information about the GUI")
+        dlg.setText("""
+            Editing selected wave ranges from the plot
+            is a little odd, easiest way is to edit them 
+            from the side
+                    
+            Good old checklist:
+                    
+            * put the right file in observed.dat
+            * input your initial estimate parameters
+            * set the appropriate elements to be fittable
+            * set vsini to be fittable or fixed
+            * used the right line list in vlines.dat
+            * set spectral windows and Itot in zmodel.dat
+
+        """)
+        dlg.setStandardButtons(QMessageBox.Ok)
+        dlg.setIcon(QMessageBox.Question)
+        dlg.exec()
+
 
     
 app = QApplication(sys.argv)
