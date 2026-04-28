@@ -246,7 +246,6 @@ class PlotInteractionController(QWidget):
 
         controller.patch.remove()
         controller.widget.setParent(None)
-
         if controller in self.controllers:
             self.controllers.remove(controller)
 
@@ -260,7 +259,7 @@ class PlotInteractionController(QWidget):
             self.activeController = controller
 
     def clear_controllers(self):
-        for controller in self.controllers:
+        for controller in self.controllers.copy():
             self.remove_controller(controller)
 
     def load_from_conf(self, range_list):
