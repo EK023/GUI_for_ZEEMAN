@@ -65,6 +65,7 @@ class MainWindow(uiclass, baseclass):
         self.plot_controller.switch_layer(self.master_wave_page, initialize=True)
 
         self.plot_controller.openWaveRanges.connect(self.force_open_wave_page)
+        self.plot_controller.newWaveGroupRequested.connect(self.add_new_wave_group)
         
         self.selectPlottingFileButton.clicked.connect(lambda: self.plot_data("spectrum"))
 
@@ -229,7 +230,6 @@ class MainWindow(uiclass, baseclass):
 
     def save_data_to_file(self,):
         values = self.collect_values()
-        print(values, "values in save data to file")
         self.show_save_file_dialog(values)
 
     def load_conf_from_file(self):

@@ -25,6 +25,9 @@ params = [
 
     ]
 
+FORTRAN_MAX_ALLOWED_RANGE = 200
+FORTRAN_WINDOW_SIZE = 10
+
 def get_key(row):
     return row.get("key", row["display"].replace(" ", "_"))
 

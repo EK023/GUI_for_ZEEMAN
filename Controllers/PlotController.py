@@ -29,6 +29,7 @@ class MplCanvas(FigureCanvas):
 
 class PlotInteractionController(QWidget):
     openWaveRanges = Signal()
+    newWaveGroupRequested = Signal()
     DEFAULT_COLOR = (0.12, 0.5, 0.71, 0.3)
     ACTIVE_COLOR  = (0.12, 0.5, 0.71, 0.5)
     EDGE_THRESHOLD = 6 # pixels
@@ -38,6 +39,7 @@ class PlotInteractionController(QWidget):
         self.plot_widget = plot_widget
         self.controllers = {}
         self.active_page_widget = None
+        self.span = None
 
         self.activeController = None
         self.dragMode = None
@@ -56,7 +58,7 @@ class PlotInteractionController(QWidget):
 
         for controller in self.controllers[self.active_page_widget]:
             controller.patch.set_visible(True)
-        if not initialize:
+        if self.span:
             self.clear_selection()
             self.sc.draw_idle()
 
@@ -295,12 +297,10 @@ class PlotInteractionController(QWidget):
             self.remove_controller(controller)
 
     def load_from_conf(self, range_list):
-        pass
-        # self.controllers = []
-        # for min_val, max_val in range_list:
-        #     controller = RangeController(self.sc.axes, self.graph_ranges, min_val, max_val)
-        #     controller.set_delete_callback(self.remove_controller)
-        #     self.controllers.append(controller)
+        for page in range_list:
+            for min_val, max_val in page:
+                self.add_range(min_val, max_val, active=False)
+            self.newWaveGroupRequested.emit()
 
     def get_ranges(self):
         out = []
