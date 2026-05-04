@@ -1,4 +1,4 @@
-from Rows.RangeRow import RangeRow
+from Widgets.Rows.RangeRow import RangeRow
 from Models.SelectedRange import SelectedRange
 
 class RangeController:

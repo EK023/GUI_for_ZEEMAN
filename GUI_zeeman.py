@@ -6,12 +6,12 @@ import numpy as np
 import pyqtgraph as pg
 
 from Models.Elements import Elements
-from Rows.ParameterRow import ParameterRow
-from Rows.FileSelectRow import FileSelectRow
-from Rows.ChoiceRow import ChoiceRow
+from Widgets.Rows.ParameterRow import ParameterRow
+from Widgets.Rows.FileSelectRow import FileSelectRow
+from Widgets.Rows.ChoiceRow import ChoiceRow
 from Controllers.PlotController import PlotInteractionController
-from ElementTable import ElementTable
-from Dropdown import DropDownMenu
+from Widgets.ElementTable import ElementTable
+from Widgets.Dropdown import DropDownMenu
 from Config.Reader import ConfigReader
 from Config.Writer import ConfigWriter
 from Widgets.WaveRangePage import WaveRangePage
@@ -38,7 +38,7 @@ class MainWindow(uiclass, baseclass):
         if not filename :
             filename = self.selectFile(name)
         if self.fileName:
-            self.plot_controller.clear_controllers()
+            self.clear_wave_groups()
             # self.elementTable.clear() # not sure if elements should be cleared as well
         self.fileName = filename
         self.filePathLabel.setText(filename)
@@ -197,6 +197,18 @@ class MainWindow(uiclass, baseclass):
                 
         page_widget.deleteLater()
         self.update_wave_group_names()
+
+    def clear_wave_groups(self):
+        for i in reversed(range(self.rightToolBox.count())):
+            widget = self.rightToolBox.widget(i)
+            if getattr(widget, "is_wave_layer", False) and widget != self.master_wave_page:
+                self.plot_controller.delete_layer(widget)
+                self.rightToolBox.removeItem(i)
+                widget.deleteLater()
+            if widget == self.master_wave_page:
+                self.plot_controller.active_page_widget = widget
+        self.update_wave_group_names()
+
     
     def force_open_wave_page(self):
         if self.last_active_wave_page:

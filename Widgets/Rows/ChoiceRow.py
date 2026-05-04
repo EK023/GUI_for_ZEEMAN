@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QLabel, QComboBox
 
-from Rows.BaseRow import BaseRow
+from Widgets.Rows.BaseRow import BaseRow
 
 class ChoiceRow(BaseRow):
     def __init__(self, name, layout, row, choices):

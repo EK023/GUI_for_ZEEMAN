@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
 )
 
 from Models.Elements import Elements
-from Rows.ElementRow import ElementRow
+from Widgets.Rows.ElementRow import ElementRow
 
 class ElementTable(QWidget):
     elementRemoved = Signal(str)

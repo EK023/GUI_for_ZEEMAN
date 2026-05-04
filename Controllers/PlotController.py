@@ -255,6 +255,8 @@ class PlotInteractionController(QWidget):
                 self.sc.draw_idle()
 
     def reset_patch_colors(self):
+        if self.active_page_widget not in self.controllers:
+            return
         for controller in self.controllers[self.active_page_widget]:
             controller.patch.set_facecolor(self.DEFAULT_COLOR)
             controller.patch.set_edgecolor("none")
@@ -293,10 +295,11 @@ class PlotInteractionController(QWidget):
             self.activeController = controller
 
     def clear_controllers(self):
-        for controller in self.controllers.copy():
+        for controller in self.controllers[self.active_page_widget].copy():
             self.remove_controller(controller)
 
     def load_from_conf(self, range_list):
+        self.clear_controllers()
         for page in range_list:
             for min_val, max_val in page:
                 self.add_range(min_val, max_val, active=False)

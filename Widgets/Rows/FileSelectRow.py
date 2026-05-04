@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QLabel,
 )
-from Rows.BaseRow import BaseRow
+from Widgets.Rows.BaseRow import BaseRow
 
 class FileSelectRow(BaseRow):
     def __init__(self, name, layout, row, filename  = "not selected", folder = False):

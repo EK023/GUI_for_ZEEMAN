@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal
 
 from NumberValidator import NumericInput
-from Rows.BaseRow import BaseRow
+from Widgets.Rows.BaseRow import BaseRow
 from Models.SelectedRange import SelectedRange
 
 class RangeRow(BaseRow):
