@@ -303,8 +303,8 @@ class PlotInteractionController(QWidget):
         #     self.controllers.append(controller)
 
     def get_ranges(self):
-        out = {}
+        out = []
         for page_widget, layer_list in self.controllers.items():
-            out[page_widget] = [controller.get() for controller in layer_list]
+            out.append([controller.get() for controller in layer_list])
         return out
     

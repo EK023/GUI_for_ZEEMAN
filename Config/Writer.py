@@ -29,20 +29,23 @@ class ConfigWriter:
         config["Params"][key.replace(" ", "_")] = json.dumps(val)
 
     def handle_range(self, value, wave_range_lists):
-        wave_ranges = []
         fortran_window_size = 10 # Might move all of this to some single location
         fortran_max_allowed_range = 200
-        for min_val, max_val in value:
-            while max_val - min_val > fortran_max_allowed_range:
-                    new_max = min_val + fortran_max_allowed_range
-                    wave_ranges.append([min_val, new_max])
-                    min_val = new_max
 
-            wave_ranges.append([min_val, max_val])
-        # sort the elements
-        wave_ranges = sorted(wave_ranges, key=lambda x: x[0])
-        for i in range(0, len(wave_ranges), fortran_window_size):
-            wave_range_lists.append(wave_ranges[i:i+fortran_window_size])
+        for wave_range in value:
+            print("looking at wave range", wave_range)
+            wave_ranges = []
+            for min_val, max_val in wave_range:
+                while max_val - min_val > fortran_max_allowed_range:
+                        new_max = min_val + fortran_max_allowed_range
+                        wave_ranges.append([min_val, new_max])
+                        min_val = new_max
+                wave_ranges.append([min_val, max_val])
+            wave_ranges = sorted(wave_ranges, key=lambda x: x[0])
+            print(wave_ranges, "is the processed wave ranges after splitting")
+            for i in range(0, len(wave_ranges), fortran_window_size):
+                wave_range_lists.append(wave_ranges[i:i+fortran_window_size])
+
 
 
 
