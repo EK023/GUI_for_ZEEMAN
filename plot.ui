@@ -126,7 +126,10 @@
        </item>
       </layout>
      </widget>
-     <widget class="QToolBox" name="rightPanel">
+      <widget class="QWidget" name="rightPanel">
+      <layout class="QVBoxLayout" name="rightPanelLayout">
+        <item>
+     <widget class="QToolBox" name="rightToolBox">
       <widget class="QWidget" name="page_1">
        <attribute name="label">
         <string>Elements</string>
@@ -159,17 +162,30 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_2">
+      <widget class="QWidget" name="page_3">
        <attribute name="label">
-        <string>Wave ranges</string>
+        <string>Parameters</string>
+       </attribute>    
+                <layout class="QGridLayout" name="simpleParamsLayout"/>
+      </widget>
+      <widget class="QWidget" name="page_4">
+       <attribute name="label">
+        <string>Iterlist</string>
        </attribute>
-       <layout class="QVBoxLayout" name="waveLayout">
+       <layout class="QVBoxLayout" name="iterLayout">
+                <item>
+      <widget class="QToolButton" name="addIterGroup">
+       <property name="text">
+        <string>Add iter group (rename it)</string>
+       </property>
+      </widget>
+     </item>
                <item>
-                <widget class="QScrollArea" name="waveRangeList">
+                <widget class="QScrollArea" name="iterList">
                  <property name="widgetResizable">
                   <bool>true</bool>
                  </property>
-                 <widget class="QWidget" name="waveRangeContents">
+                 <widget class="QWidget" name="iterContents">
                   <property name="geometry">
                    <rect>
                     <x>0</x>
@@ -178,26 +194,16 @@
                     <height>183</height>
                    </rect>
                   </property>
-                  <layout class="QVBoxLayout" name="waveRangeInnerLayout"/>
+                  <layout class="QVBoxLayout" name="iterInnerLayout"/>
                  </widget>
                 </widget>
                </item>
-               <item>
-      <widget class="QToolButton" name="addRangeButton">
-       <property name="text">
-        <string>Add range</string>
-       </property>
-      </widget>
-     </item>
               </layout>
       </widget>
-      <widget class="QWidget" name="page_3">
-       <attribute name="label">
-        <string>Parameters</string>
-       </attribute>    
-                <layout class="QGridLayout" name="simpleParamsLayout"/>
-      </widget>
      </widget>
+        </item>
+      </layout>
+    </widget>
     </widget>
    </item>
   </layout>

@@ -33,15 +33,32 @@ class PlotInteractionController(QWidget):
     ACTIVE_COLOR  = (0.12, 0.5, 0.71, 0.5)
     EDGE_THRESHOLD = 6 # pixels
 
-    def __init__(self, plot_widget, graph_ranges):
+    def __init__(self, plot_widget):
         super().__init__()
         self.plot_widget = plot_widget
-        self.graph_ranges = graph_ranges
-        self.controllers = []
+        self.controllers = {}
+        self.active_page_widget = None
+
         self.activeController = None
         self.dragMode = None
         self.isDragging = False
         self.clicked_empty_space = False
+
+    def switch_layer(self, page_widget, initialize=False):
+        if self.active_page_widget in self.controllers:
+            for controller in self.controllers[self.active_page_widget]:
+                controller.patch.set_visible(False)
+        
+        self.active_page_widget = page_widget
+
+        if self.active_page_widget not in self.controllers:
+            self.controllers[self.active_page_widget] = []
+
+        for controller in self.controllers[self.active_page_widget]:
+            controller.patch.set_visible(True)
+        if not initialize:
+            self.clear_selection()
+            self.sc.draw_idle()
 
     def loadData(self, filename):
         data = np.loadtxt(filename, usecols=(0, 1))
@@ -100,7 +117,7 @@ class PlotInteractionController(QWidget):
         edge_hit = False
 
         # 1. Check if we clicked on the RESIZE EDGE of ANY existing controller
-        for controller in self.controllers:
+        for controller in self.controllers[self.active_page_widget]:
             cmin_pix = self.sc.axes.transData.transform((controller.xmin, 0))[0]
             cmax_pix = self.sc.axes.transData.transform((controller.xmax, 0))[0]
             
@@ -111,7 +128,7 @@ class PlotInteractionController(QWidget):
 
         # 2. If not an edge, check if we clicked dead-center INSIDE ANY existing controller
         if not clicked_controller:
-            for controller in self.controllers:
+            for controller in self.controllers[self.active_page_widget]:
                 if controller.xmin <= event.xdata <= controller.xmax:
                     clicked_controller = controller
                     break
@@ -188,8 +205,8 @@ class PlotInteractionController(QWidget):
         self.activeController.patch.set_edgecolor("tab:blue")
 
     def range_exists(self, xmin, xmax, tol=1e-6):
-        for controller in self.controllers:
-            cmin, cmax = controller.get()
+        for controller in self.controllers[self.active_page_widget]:
+            cmin, cmax = controller.xmin, controller.xmax
             if abs(cmin - xmin) < tol and abs(cmax - xmax) < tol:
                 return True
         return False
@@ -236,7 +253,7 @@ class PlotInteractionController(QWidget):
                 self.sc.draw_idle()
 
     def reset_patch_colors(self):
-        for controller in self.controllers:
+        for controller in self.controllers[self.active_page_widget]:
             controller.patch.set_facecolor(self.DEFAULT_COLOR)
             controller.patch.set_edgecolor("none")
 
@@ -246,15 +263,30 @@ class PlotInteractionController(QWidget):
 
         controller.patch.remove()
         controller.widget.setParent(None)
-        if controller in self.controllers:
-            self.controllers.remove(controller)
+        for page_widget, layer_list in self.controllers.items():
+            if controller in layer_list:
+                layer_list.remove(controller)
+                break
 
         self.sc.draw_idle()
 
+    def delete_layer(self, page_widget):
+        """Completely wipes a layer and its ranges from the plot."""
+        if page_widget in self.controllers:
+            for controller in list(self.controllers[page_widget]):
+                self.remove_controller(controller)
+            del self.controllers[page_widget]
+            
+        if self.active_page_widget == page_widget:
+            self.active_page_widget = None
+
     def add_range(self, min_val, max_val, active=True):
-        controller = RangeController(self.sc.axes, self.graph_ranges, min_val, max_val)
+        target_layout = self.active_page_widget.ranges_layout
+
+        controller = RangeController(self.sc.axes, target_layout, min_val, max_val)
         controller.set_delete_callback(self.remove_controller)
-        self.controllers.append(controller)
+        self.controllers[self.active_page_widget].append(controller)
+
         if active:
             self.activeController = controller
 
@@ -263,13 +295,16 @@ class PlotInteractionController(QWidget):
             self.remove_controller(controller)
 
     def load_from_conf(self, range_list):
-        self.controllers = []
-        for min_val, max_val in range_list:
-            controller = RangeController(self.sc.axes, self.graph_ranges, min_val, max_val)
-            controller.set_delete_callback(self.remove_controller)
-            self.controllers.append(controller)
+        pass
+        # self.controllers = []
+        # for min_val, max_val in range_list:
+        #     controller = RangeController(self.sc.axes, self.graph_ranges, min_val, max_val)
+        #     controller.set_delete_callback(self.remove_controller)
+        #     self.controllers.append(controller)
 
     def get_ranges(self):
-        return [controller.get() for controller in self.controllers]
-
+        out = {}
+        for page_widget, layer_list in self.controllers.items():
+            out[page_widget] = [controller.get() for controller in layer_list]
+        return out
     

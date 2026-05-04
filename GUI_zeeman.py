@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtCore import QEvent, Qt, QEvent
-from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QToolButton, QVBoxLayout, QWidget, QScrollArea, QHBoxLayout
 
 import numpy as np
 import pyqtgraph as pg
@@ -14,6 +14,7 @@ from ElementTable import ElementTable
 from Dropdown import DropDownMenu
 from Config.Reader import ConfigReader
 from Config.Writer import ConfigWriter
+from Widgets.WaveRangePage import WaveRangePage
 from parameters import params, get_key as get_params_key
 # from Zeeman import zeeman_python
 
@@ -37,30 +38,33 @@ class MainWindow(uiclass, baseclass):
         if not filename :
             filename = self.selectFile(name)
         if self.fileName:
-            self.plotInteraction.clear_controllers()
+            self.plot_controller.clear_controllers()
             # self.elementTable.clear() # not sure if elements should be cleared as well
         self.fileName = filename
         self.filePathLabel.setText(filename)
-        self.plotInteraction.loadData(filename)
+        self.plot_controller.loadData(filename)
 
     def __init__(self):
         super().__init__()
         self.setupUi(self)
 
-        self.rightPanel.setMinimumWidth(250)
-        self.rightPanel.setMaximumWidth(250)
-
-        self.page_3.setMinimumWidth(250)
-        self.page_3.setMaximumWidth(250)
+        self.rightToolBox.setMinimumWidth(250)
+        self.rightToolBox.setMaximumWidth(250)
 
         self.mainSplitter.setStretchFactor(0, 1) 
         self.mainSplitter.setStretchFactor(1, 0)
 
-        self.plotInteraction = PlotInteractionController(self.plotArea, self.waveRangeContents.layout())
+        self.plot_controller = PlotInteractionController(self.plotArea)
 
-        self.plotInteraction.openWaveRanges.connect(lambda: self.rightPanel.setCurrentWidget(self.page_2))
+        self.master_wave_page = WaveRangePage(is_master=True)
+        self.rightToolBox.insertItem(1, self.master_wave_page, "Wave ranges")
+        self.connect_wave_page_signals(self.master_wave_page)
+        
+        self.last_active_wave_page = self.master_wave_page
+        self.rightToolBox.currentChanged.connect(self.on_toolbox_changed)
+        self.plot_controller.switch_layer(self.master_wave_page, initialize=True)
 
-        self.addRangeButton.clicked.connect(lambda: self.plotInteraction.add_range(0, 0, active=False))
+        self.plot_controller.openWaveRanges.connect(self.force_open_wave_page)
         
         self.selectPlottingFileButton.clicked.connect(lambda: self.plot_data("spectrum"))
 
@@ -76,8 +80,11 @@ class MainWindow(uiclass, baseclass):
         self.elementData = self.load_elements("newatom.dat")
 
         self.elementDropDown = DropDownMenu(self.SelectElements, self.elementData.keys())
-
         self.elementDropDown.popup.elementToggled.connect(self.handle_element_toggle)
+
+        self.iterlistData = ['vr', 'vmic', 'vmac', 'vsini', 'teff', 'logg','metal', 'contpoly'] + list(self.elementData.keys())
+
+        self.iterlistDropdown = DropDownMenu(self.addIterGroup, self.iterlistData)
 
         self.elementTable.elementRemoved.connect(self.elementDropDown.popup.uncheck_element)
         self.elementTable.elementAdded.connect(self.elementDropDown.popup.check_element)
@@ -90,6 +97,13 @@ class MainWindow(uiclass, baseclass):
                           usecols=(2, 10), skiprows=1, max_rows=count
                           )
         return {el: est for el, est in zip(data["elements"], data["estimates"])}
+    
+    def connect_wave_page_signals(self, page_widget):
+        """Helper to wire up a new WaveRangePage."""
+        page_widget.request_add_range.connect(self.manual_add_range)
+        page_widget.request_new_group.connect(self.add_new_wave_group)
+        page_widget.request_delete.connect(self.delete_wave_group)
+
         
     def handle_element_toggle(self, element, checked):
         if checked:
@@ -129,11 +143,69 @@ class MainWindow(uiclass, baseclass):
             results[name] = field.get()    
 
         results["elements"] = self.elementTable.to_dict()
-        results["ranges"] = self.plotInteraction.get_ranges()
+        results["ranges"] = self.plot_controller.get_ranges()
         
         results["obsspecpath"] = self.fileName
         
         return results
+    
+    def add_new_wave_group(self):
+        existing_waves = sum(1 for i in range(self.rightToolBox.count()) 
+                             if getattr(self.rightToolBox.widget(i), "is_wave_layer", False))
+        group_name = f"Wave ranges {existing_waves + 1}"
+        
+        new_page = WaveRangePage()
+        self.connect_wave_page_signals(new_page)
+
+        insert_index = self.rightToolBox.currentIndex() + 1
+        self.rightToolBox.insertItem(insert_index, new_page, group_name)
+
+        self.rightToolBox.setCurrentIndex(insert_index)
+
+    def update_wave_group_names(self):
+        wave_group_count = 1
+        for i in range(self.rightToolBox.count()):
+            widget = self.rightToolBox.widget(i)
+            if getattr(widget, "is_wave_layer", False):
+                self.rightToolBox.setItemText(i, f"Wave ranges {wave_group_count}")
+                wave_group_count += 1
+
+    def on_toolbox_changed(self, index):
+        if index < 0:
+            return
+            
+        current_page = self.rightToolBox.widget(index)
+        
+        if getattr(current_page, "is_wave_layer", False):
+            current_page = self.rightToolBox.widget(index)
+
+            self.plot_controller.switch_layer(current_page)
+            self.last_active_wave_page = current_page
+        else:
+            self.plot_controller.clear_selection()
+            self.plot_controller.dragMode = None
+
+    def delete_wave_group(self, page_widget):
+        self.plot_controller.delete_layer(page_widget)
+        
+        for i in range(self.rightToolBox.count()):
+            if self.rightToolBox.widget(i) == page_widget:
+                self.rightToolBox.removeItem(i)
+                self.rightToolBox.setCurrentIndex(i-1)
+                break
+                
+        page_widget.deleteLater()
+        self.update_wave_group_names()
+    
+    def force_open_wave_page(self):
+        if self.last_active_wave_page:
+            # Find the index using the widget object
+            idx = self.rightToolBox.indexOf(self.last_active_wave_page)
+            if idx != -1 and self.rightToolBox.currentIndex() != idx:
+                self.rightToolBox.setCurrentIndex(idx)
+
+    def manual_add_range(self):
+        self.plot_controller.add_range(0, 0, active=False)
     
     def add_elements_to_layout(self, layout, elements):
         for e in elements:
@@ -170,7 +242,7 @@ class MainWindow(uiclass, baseclass):
 
         self.plot_data(filename=data["obsspecpath"])
 
-        self.plotInteraction.load_from_conf(data['wave_range_lists'])
+        self.plot_controller.load_from_conf(data['wave_range_lists'])
         self.elementTable.load_from_conf(data["elements"])
 
     def show_help_dialog(self):

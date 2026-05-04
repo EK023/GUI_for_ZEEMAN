@@ -45,7 +45,7 @@ class ConfigReader:
 
         iterset = set( data["iterlist"][0]) if data["iterlist"] else set()
         # print(data["contpoly"], int("contpoly" in iterset))
-        # data["contpoly"] = [data["contpoly"], int("contpoly" in iterset)] # add the contpoly checkbox status from iterlist
+        data["contpoly"] = [data["contpoly"], int("contpoly" in iterset)] # add the contpoly checkbox status from iterlist
 
         # transform data to the style it needs to be for the ui classes
         data['wave_range_lists'] = self.merge_ranges(data['wave_range_lists'])
