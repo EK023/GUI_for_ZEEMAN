@@ -172,33 +172,8 @@
        <attribute name="label">
         <string>Iterlist</string>
        </attribute>
-       <layout class="QVBoxLayout" name="iterLayout">
-                <item>
-      <widget class="QToolButton" name="addIterGroup">
-       <property name="text">
-        <string>Add iter group (rename it)</string>
-       </property>
-      </widget>
-     </item>
-               <item>
-                <widget class="QScrollArea" name="iterList">
-                 <property name="widgetResizable">
-                  <bool>true</bool>
-                 </property>
-                 <widget class="QWidget" name="iterContents">
-                  <property name="geometry">
-                   <rect>
-                    <x>0</x>
-                    <y>0</y>
-                    <width>905</width>
-                    <height>183</height>
-                   </rect>
-                  </property>
-                  <layout class="QVBoxLayout" name="iterInnerLayout"/>
-                 </widget>
-                </widget>
-               </item>
-              </layout>
+       <layout class="QVBoxLayout" name="iterLayout"/>
+
       </widget>
      </widget>
         </item>

@@ -21,6 +21,9 @@ class ConfigWriter:
     def handle_bool(self,key, value, config):
         config["Params"][key.replace(" ", "_")] = json.dumps(int(value.get("enabled")))
 
+    def handle_iterlist(self, key, value, config):
+        config["Params"][key.replace(" ", "_")] = json.dumps(value)
+
     def handle_int(self,key, value, config):
         try:
             val = int(round(float(value.get("value"))))
@@ -42,22 +45,15 @@ class ConfigWriter:
             for i in range(0, len(wave_ranges), FORTRAN_MAX_ALLOWED_RANGE):
                 wave_range_lists.append(wave_ranges[i:i+FORTRAN_WINDOW_SIZE])
 
-
-
-
-    def handle_elements(self, dict, elements, iterlist):
+    def handle_elements(self, dict, elements):
         for value in dict:
             el = value.get("element")
             est = float(value.get("estimate"))
             fit = int(value.get("fit"))
-            iter = value.get("iterlist")
-            if iter:
-                iterlist.append(el)
             elements.append([el, est, fit])
 
     def write(self, data):
         elements = []
-        iterlist = []
         wave_range_lists = []
 
         SAVE_HANDLERS = {
@@ -68,7 +64,8 @@ class ConfigWriter:
             "choice": self.handle_string,
             "hiddenFile": self.handle_string,
             "ranges": lambda k, v, c: self.handle_range(v, wave_range_lists),
-            "elements": lambda k, v, c: self.handle_elements(v, elements, iterlist),
+            "elements": lambda k, v, c: self.handle_elements(v, elements),
+            "iterlist": self.handle_iterlist
         }
 
         config = configparser.ConfigParser(delimiters=(':'))
@@ -85,9 +82,7 @@ class ConfigWriter:
                 handler(key, value, config)
 
         config["Params"]["elements"] = json.dumps(elements)
-        config["Params"]["iterlist"] = json.dumps([iterlist])
         config["Params"]["wave_range_lists"] = json.dumps(wave_range_lists)
-        
 
         with open(self.config_path, "w") as f:
             config.write(f)

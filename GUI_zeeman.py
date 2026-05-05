@@ -16,6 +16,7 @@ from Config.Reader import ConfigReader
 from Config.Writer import ConfigWriter
 from Widgets.WaveRangePage import WaveRangePage
 from parameters import params, get_key as get_params_key
+from Widgets.ListBuilder import ListBuilderWidget
 # from Zeeman import zeeman_python
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
@@ -48,8 +49,8 @@ class MainWindow(uiclass, baseclass):
         super().__init__()
         self.setupUi(self)
 
-        self.rightToolBox.setMinimumWidth(250)
-        self.rightToolBox.setMaximumWidth(250)
+        self.rightToolBox.setMinimumWidth(300)
+        self.rightToolBox.setMaximumWidth(300)
 
         self.mainSplitter.setStretchFactor(0, 1) 
         self.mainSplitter.setStretchFactor(1, 0)
@@ -83,9 +84,9 @@ class MainWindow(uiclass, baseclass):
         self.elementDropDown = DropDownMenu(self.SelectElements, self.elementData.keys())
         self.elementDropDown.popup.elementToggled.connect(self.handle_element_toggle)
 
-        self.iterlistData = ['vr', 'vmic', 'vmac', 'vsini', 'teff', 'logg','metal', 'contpoly'] + list(self.elementData.keys())
-
-        self.iterlistDropdown = DropDownMenu(self.addIterGroup, self.iterlistData)
+        all_params = ['vr', 'vmic', 'vmac', 'vsini', 'teff', 'logg','metal', 'contpoly'] + list(self.elementData.keys())
+        self.iterlist_builder = ListBuilderWidget(all_params)
+        self.iterLayout.addWidget(self.iterlist_builder)
 
         self.elementTable.elementRemoved.connect(self.elementDropDown.popup.uncheck_element)
         self.elementTable.elementAdded.connect(self.elementDropDown.popup.check_element)
@@ -143,6 +144,7 @@ class MainWindow(uiclass, baseclass):
         for name, field in self.fields.items():
             results[name] = field.get()    
 
+        results['iterlist'] = self.iterlist_builder.get_lists_of_lists()
         results["elements"] = self.elementTable.to_dict()
         results["ranges"] = self.plot_controller.get_ranges()
         
@@ -182,9 +184,6 @@ class MainWindow(uiclass, baseclass):
 
             self.plot_controller.switch_layer(current_page)
             self.last_active_wave_page = current_page
-        else:
-            self.plot_controller.clear_selection()
-            self.plot_controller.dragMode = None
 
     def delete_wave_group(self, page_widget):
         self.plot_controller.delete_layer(page_widget)
@@ -234,7 +233,6 @@ class MainWindow(uiclass, baseclass):
     
     def show_save_file_dialog(self,values):
         file_name, _ = QFileDialog.getSaveFileName(window, 'Save File', '','All Files (*) ;;Text Files (*.txt)') # can change default file formats
-
         if file_name:
             self.config_writer = ConfigWriter(file_name, values)
 
@@ -253,7 +251,7 @@ class MainWindow(uiclass, baseclass):
                 self.fields[key].set(value)
 
         self.plot_data(filename=data["obsspecpath"])
-
+        self.iterlist_builder.load_from_conf(data["iterlist"])
         self.plot_controller.load_from_conf(data['wave_range_lists'])
         self.elementTable.load_from_conf(data["elements"])
 

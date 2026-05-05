@@ -16,20 +16,15 @@ class ElementRow(BaseRow):
         self.estimate = NumericInput(str(model.estimate))
         self.fit = QCheckBox()
         self.fit.setChecked(model.fit)
-        self.iterlist = QCheckBox()
-        self.iterlist.setChecked(model.iterlist)
 
         self.estimate.editingFinished.connect(self.update_estimate)
         self.fit.stateChanged.connect(lambda state: setattr(self.model, 'fit', bool(state)))
-        self.iterlist.stateChanged.connect(lambda state: setattr(self.model, 'iterlist', bool(state)))
-
 
     def get(self):
         return {
             "element": self.element.text(),
             "estimate": self.estimate.text(),
             "fit": self.fit.isChecked(),
-            "iterlist": self.iterlist.isChecked(),
         }
     
     def update_estimate(self):

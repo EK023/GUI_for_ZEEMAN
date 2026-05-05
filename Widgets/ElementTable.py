@@ -24,7 +24,7 @@ class ElementTable(QWidget):
         self._init_headers()
 
     def _init_headers(self):
-        headers = ["Element", "Estimate", "  Fit  ", "  Iter  "]
+        headers = ["Element", "Estimate", "  Fit  "] 
         self.layout.setRowStretch(999, 1)
         for col, text in enumerate(headers):
             label = QLabel(text)
@@ -47,8 +47,7 @@ class ElementTable(QWidget):
         self.layout.addWidget(group.element, row, 0)
         self.layout.addWidget(group.estimate, row, 1)
         self.layout.addWidget(group.fit, row, 2, alignment=Qt.AlignCenter)
-        self.layout.addWidget(group.iterlist, row, 3, alignment=Qt.AlignCenter)
-        self.layout.addWidget(delete_button, row, 4)
+        self.layout.addWidget(delete_button, row, 3)
 
         self.rows[element] = group
         self.current_row += 1
@@ -76,8 +75,7 @@ class ElementTable(QWidget):
             self.layout.addWidget(group.element, self.current_row, 0)
             self.layout.addWidget(group.estimate, self.current_row, 1)
             self.layout.addWidget(group.fit, self.current_row, 2, alignment=Qt.AlignCenter)
-            self.layout.addWidget(group.iterlist, self.current_row, 3, alignment=Qt.AlignCenter)
-            self.layout.addWidget(delete_button, self.current_row, 4 )
+            self.layout.addWidget(delete_button, self.current_row, 3 )
 
             self.current_row += 1
 
@@ -99,5 +97,5 @@ class ElementTable(QWidget):
     def load_from_conf(self, element_list):
         # remove all previously added elements
         self.clear()
-        for el, est, fit, iter in element_list:
-            self.add_element(Elements(el, est, fit, iter))
+        for el, est, fit in element_list:
+            self.add_element(Elements(el, est, fit))
