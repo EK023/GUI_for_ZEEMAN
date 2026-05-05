@@ -300,10 +300,11 @@ class PlotInteractionController(QWidget):
 
     def load_from_conf(self, range_list):
         self.clear_controllers()
-        for page in range_list:
+        for i, page in enumerate(range_list):
             for min_val, max_val in page:
                 self.add_range(min_val, max_val, active=False)
-            self.newWaveGroupRequested.emit()
+            if i < len(range_list) - 1:
+                self.newWaveGroupRequested.emit()
 
     def get_ranges(self):
         out = []
