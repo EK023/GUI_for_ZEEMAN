@@ -1,8 +1,11 @@
 import json
+import os
 import configparser
-from parameters import FORTRAN_WINDOW_SIZE
+from parameters import FORTRAN_WINDOW_SIZE, params, get_key
 
 class ConfigReader:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    ZEEMAN_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "Zeeman"))
     def __init__(self, config_path):
         self.config_path = config_path
     """
@@ -59,28 +62,51 @@ class ConfigReader:
             final_pages.append(merged_page)
             
         return final_pages
+    
+    def resolve_smart_path(self,read_path, anchor_directory):
+        """
+        Takes a path read from the config file and turns it back into an absolute path
+        so the GUI can display and use it properly.
+        """
+        if not read_path:
+            return ""
 
-    def merge_element_data(self, elements, iterset):
+        # 1. If it's already an absolute path (/home/../...), return it as-is
+        if os.path.isabs(read_path):
+            return os.path.normpath(read_path)
+
+        # 2. If it's a relative path (inputs/wave.dat), glue it to the anchor directory
+        full_path = os.path.join(anchor_directory, read_path)
+        
+        # 3. Clean up the slashes and return the absolute path
+        return os.path.normpath(full_path)
+
+    def merge_element_data(self, elements):
         return [
-            [el, est, fit, int(el in iterset)]
+            [el, est, fit]
             for el, est, fit in elements
         ]
 
     def read(self):
         config = configparser.ConfigParser(delimiters=(':'), comment_prefixes="#")
         config.read(self.config_path)
-        params = config["Params"]
+        conf = config["Params"]
         data = {}
+        filePaths = set()
+        for meta in params:
+            key = get_key(meta)
+            if meta["type"] in ["file", "hiddenFile"]:
+                filePaths.add(key)
+                
 
-        for key in params:
-            value = json.loads(params[key]) if params[key] else []
-            data[key.split(",")[0]] = value
-
-        iterset = set( data["iterlist"][0]) if data["iterlist"] else set()
-        # print(data["contpoly"], int("contpoly" in iterset))
-        # data["contpoly"] = [data["contpoly"], int("contpoly" in iterset)] # add the contpoly checkbox status from iterlist
+        for raw_key, raw_value in conf.items():
+            clean_key = raw_key.split(",")[0]
+            value = json.loads(raw_value) if raw_value else []
+            if clean_key in filePaths:
+                value = self.resolve_smart_path(value, self.ZEEMAN_DIR)
+            data[clean_key] = value
 
         # transform data to the style it needs to be for the ui classes
         data['wave_range_lists'] = self.merge_ranges(data['wave_range_lists'])
-        data["elements"] = self.merge_element_data(data["elements"],iterset)
+        data["elements"] = self.merge_element_data(data["elements"])
         return data

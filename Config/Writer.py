@@ -1,11 +1,35 @@
 import json
+import os
 import configparser
 from parameters import params, get_key, FORTRAN_MAX_ALLOWED_RANGE, FORTRAN_WINDOW_SIZE
 
 class ConfigWriter:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    ZEEMAN_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "Zeeman"))
     def __init__(self, config_path, data):
         self.config_path = config_path
         self.write(data)
+
+    def format_smart_paths(self, target_file_path, anchor_directory):
+        if not target_file_path:
+            return "" 
+        
+        abs_file = os.path.abspath(target_file_path)
+        abs_anchor = os.path.abspath(anchor_directory)
+        try:
+            # commonpath returns the shared root folder. 
+            # If the shared root IS the anchor, the file must be inside it!
+            if os.path.commonpath([abs_file, abs_anchor]) == abs_anchor:
+                
+                # Create a clean relative path (e.g., "data/my_file.txt")
+                return os.path.relpath(abs_file, abs_anchor)
+                
+        except ValueError:
+            # This triggers on Windows if files are on different drives (C: vs D:)
+            pass
+
+        # 3. If it is outside, return the absolute path
+        return abs_file
 
     def handle_fit(self,key, value, config):
         try:
@@ -14,6 +38,12 @@ class ConfigWriter:
             val = 0
         enabled = int(value.get("enabled"))
         config["Params"][f"{key},fit{key}"] = json.dumps([val, enabled])
+
+    def handle_file(self, key, value, config):
+        if value == "not selected":
+            return
+        smart_path = self.format_smart_paths(value, self.ZEEMAN_DIR)
+        self.handle_string(key, smart_path, config)
 
     def handle_string(self, key, value, config):
         config["Params"][key.replace(" ", "_")] = json.dumps(value)
@@ -60,9 +90,9 @@ class ConfigWriter:
             "fit": self.handle_fit,
             "bool": self.handle_bool,
             "int": self.handle_int,
-            "file": self.handle_string,
+            "file": self.handle_file,
             "choice": self.handle_string,
-            "hiddenFile": self.handle_string,
+            "hiddenFile": self.handle_file,
             "ranges": lambda k, v, c: self.handle_range(v, wave_range_lists),
             "elements": lambda k, v, c: self.handle_elements(v, elements),
             "iterlist": self.handle_iterlist
