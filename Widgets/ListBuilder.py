@@ -77,9 +77,15 @@ class ListBuilderWidget(QWidget):
         if target_item.data(0, Qt.UserRole) != "is_group":
             target_item = target_item.parent()
 
+        existing_texts = set()
+        for i in range(target_item.childCount()):
+            existing_texts.add(target_item.child(i).text(0))
+
         for item in source_items:
-            new_child = QTreeWidgetItem(target_item, [item.text()])
-            new_child.setData(0, Qt.UserRole, "is_parameter")
+            param_name = item.text()
+            if param_name not in existing_texts:
+                new_child = QTreeWidgetItem(target_item, [item.text()])
+                new_child.setData(0, Qt.UserRole, "is_parameter")
             
         target_item.setExpanded(True)
 
