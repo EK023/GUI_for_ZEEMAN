@@ -7,4 +7,5 @@ __pycache__/
 proov
 newatom.dat
 plot2.ui
-Zeeman
+Zeeman/*
+!Zeeman/zeeman_python.py
