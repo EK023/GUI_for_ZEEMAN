@@ -17,7 +17,7 @@ from Config.Writer import ConfigWriter
 from Widgets.WaveRangePage import WaveRangePage
 from parameters import params, get_key as get_params_key
 from Widgets.ListBuilder import ListBuilderWidget
-# from Zeeman import zeeman_python
+from Zeeman import zeeman_python
 
 uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
 
@@ -79,7 +79,7 @@ class MainWindow(uiclass, baseclass):
         self.initiate_fields(self.page_3.layout())
         self.elementTable = ElementTable(self.elementsContainer.layout())
 
-        self.elementData = self.load_elements("newatom.dat")
+        self.elementData = self.load_elements("Zeeman/data/newatom.dat")
 
         self.elementDropDown = DropDownMenu(self.SelectElements, self.elementData.keys())
         self.elementDropDown.popup.elementToggled.connect(self.handle_element_toggle)
@@ -236,7 +236,7 @@ class MainWindow(uiclass, baseclass):
         if file_name:
             self.config_writer = ConfigWriter(file_name, values)
 
-        # zeeman_python.run(file_name)
+        zeeman_python.run(file_name)
 
     def save_data_to_file(self,):
         values = self.collect_values()

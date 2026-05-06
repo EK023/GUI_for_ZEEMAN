@@ -11,9 +11,15 @@
 * First install all the required dependencies:
 ```pip install -r requirements.txt```
 
-* Then copy the file newatom.dat to the current folder (take it from zeeman data folder)
-It is needed to load in the default abundances for the elements
+* Then copy all the necessary files to run the Zeeman into Zeeman folder.
+Also add the necessary format files that are need for zeeman_python.py
+zmodel_format.dat, inlmam_format.dat, elementdic.dat (all of these go into Zeeman folder)
+(didn't add those yet because not sure if I have the right to distribute these)
 
+* Before running the code, open zeeman_python.py and insert your lmau-zuc file into the 9th row```LMAU_ZUC_FILE=""```
 
-* Navigate to the folder where the code was installed and run it from terminal
+* If you forget to add it and run the program then please close it and then change the previous value.
+* At the moment zeeman_python.py runs in the terminal where you started the GUI and its results are also shown there. While it runs the GUI is not operatable and you need to wait till the zeeman_python.py finishes its job.
+
+* Finally navigate to the folder where the code was installed and run it from the terminal
 ```python3 GUI_zeeman.py```

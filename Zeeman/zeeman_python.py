@@ -4,16 +4,22 @@ import pandas as pd
 import json
 import configparser
 import sys
+import subprocess
 
-def check_model_atm(model_atm_folder="./data/ATLAS9"):
+LMAU_ZUC_FILE = "" #lmau-zuc0.9.7.18.f
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+def check_model_atm(model_atm_folder=f"{base_dir}/data/ATLAS9"):
     # Change model atmospheres and updates the lma executable
 
-    if not os.path.isdir(model_atm_folder):
+    if not os.path.isdir(f"{base_dir}/{model_atm_folder}"):
         raise FileNotFoundError("No File Found")
-    model_atm_folder = os.path.join(model_atm_folder,'')
+    model_atm_folder = os.path.join(f"{base_dir}/{model_atm_folder}","")
 
     update_model_atm = False
-    filename = "lmau-zuc0.9.5.2-dil.f"
+    if LMAU_ZUC_FILE == "":
+        raise ValueError("No value provided for LMAU_ZUC_FILE. Please provide the filename for the LMAU_ZUC_FILE.")
+    filename = f"{base_dir}/{LMAU_ZUC_FILE}"
 
     with open(filename,"r") as file:
         lines = file.readlines()
@@ -37,11 +43,11 @@ def check_model_atm(model_atm_folder="./data/ATLAS9"):
         print("Model atmosphere and lma are up-to-date!")
 
 def update_zmodel(wave_range_list,res,run_format,vsini=0,vmic=0,vmac=0):
-    path = "data/zmodel.dat"
+    path = f"{base_dir}/data/zmodel.dat"
 
     # copies a typical format of zmodel.dat file and edit it with the new parameters.
     # there are better ways of doing this. Will improve it later!!
-    os.system("cp zmodel_format.dat data/zmodel.dat")
+    os.system(f"cp {base_dir}/zmodel_format.dat {base_dir}/data/zmodel.dat")
     zmodelfile = open(path)
     lines = zmodelfile.readlines()
     zmodelfile.close()
@@ -63,7 +69,7 @@ def update_zmodel(wave_range_list,res,run_format,vsini=0,vmic=0,vmac=0):
 def update_inlmam(vr,vsini,vmic,vmac,teff,logg,metal,fitvr,fitvsini,fitvmic,fitvmac,fitteff,fitlogg,fitmetal,contpoly,elements):
 
     # a dictionary of atomic numbers and their respective element names
-    with open('elementdic.dat') as f:
+    with open(f"{base_dir}/elementdic.dat") as f:
         elementdic = json.load(f)
 
     elementkey_list = list(elementdic.keys())
@@ -71,7 +77,7 @@ def update_inlmam(vr,vsini,vmic,vmac,teff,logg,metal,fitvr,fitvsini,fitvmic,fitv
 
     # copies a typical format of inlmam.dat file and edit it with the new parameters.
     # there are better ways of doing this. Will improve it later!!
-    inlmamfile = open("inlmam_format.dat")
+    inlmamfile = open(f"{base_dir}/inlmam_format.dat")
     inlmam_lines = inlmamfile.readlines()
     inlmamfile.close()
     inlmam_lines[3] = f'{vr}E+5   {fitvr}\n'
@@ -83,7 +89,7 @@ def update_inlmam(vr,vsini,vmic,vmac,teff,logg,metal,fitvr,fitvsini,fitvmic,fitv
     inlmam_lines[15] = f'{metal}   {fitmetal}\n'
     inlmam_lines[25] = f'{contpoly}\n'
 
-    with open("inlmam.dat", "w") as file:
+    with open(f"{base_dir}/inlmam.dat", "w") as file:
         for iinlmam_line,inlmam_line in enumerate(inlmam_lines):
              if iinlmam_line==27 and len(elements) != 0:
                 for element in elements:
@@ -104,9 +110,9 @@ def fit_wave_ranges(vr,vsini,vmic,vmac,teff,logg,metal,fitvr,fitvsini,fitvmic,fi
 
     fitlist = [fitteff, fitlogg, fitvsini, fitvmic, fitvmac, fitvr, fitmetal, 0]
 
-    os.system(f"cp {vlinespath} data/vlines.dat")
+    os.system(f"cp {base_dir}/{vlinespath} {base_dir}/data/vlines.dat")
     if run_format=='fit':
-        os.system(f"cp {obsspecpath} observed.dat")
+        os.system(f"cp {base_dir}/{obsspecpath} {base_dir}/observed.dat")
 
     if len(elements)!=0:
         for elem in elements:
@@ -149,9 +155,19 @@ def fit_wave_ranges(vr,vsini,vmic,vmac,teff,logg,metal,fitvr,fitvsini,fitvmic,fi
 
         # runs the Zeeman code here
         if run_format=='fit':
-            os.system("./lma")
+            try:
+                subprocess.run(["./lma"], cwd=base_dir, check=True)
+            except subprocess.CalledProcessError:
+                print("ERROR: Fortran 'lma' executable failed to run!")
         elif run_format=='syn':
-            os.system('./zuc')
+            try:
+                subprocess.run(["./lma"], cwd=base_dir, check=True)
+            except subprocess.CalledProcessError:
+                print("ERROR: Fortran 'lma' executable failed to run!")
+            try:
+                subprocess.run(["./zuc"], cwd=base_dir, check=True)
+            except subprocess.CalledProcessError:
+                print("ERROR: Fortran 'zuc' executable failed to run!")
             return
 
         else:
@@ -160,15 +176,15 @@ def fit_wave_ranges(vr,vsini,vmic,vmac,teff,logg,metal,fitvr,fitvsini,fitvmic,fi
         # saving the files to the "mainpath" folder
         if savefile:
             os.mkdir(path)
-            os.system(f"cp plotff1i {path}/plotff1i")
-            os.system(f"cp results.dat {path}/results.dat")
-        result = open("results.dat").read()
+            os.system(f"cp {base_dir}/plotff1i {path}/plotff1i")
+            os.system(f"cp {base_dir}/results.dat {path}/results.dat")
+        result = open(f"{base_dir}/results.dat").read()
         resultslist.append(result)
 
         # plotting the synthetic and observed spectrum
         if showplot:
-            os.system(f"python3 plotspec-vald-gui3c.py plotff1i")
-    outputfile = os.path.join(mainpath,"results.csv")
+            os.system(f"python3 plotspec-vald-gui3c.py {base_dir}/plotff1i")
+    outputfile = os.path.join(base_dir,mainpath,"results.csv")
 
     # making a csv file storing the parameter values, and whether they were used for fitting or not
     df = results_to_csv(resultslist,wave_range_namelist,fitlist,outputfile,elements,savefile)
@@ -176,7 +192,7 @@ def fit_wave_ranges(vr,vsini,vmic,vmac,teff,logg,metal,fitvr,fitvsini,fitvmic,fi
 
 def results_to_csv(resultslist,waverangelist,fitlist,outputfile,elements,savefile=False):
 
-    with open('elementdic.dat') as f:
+    with open(f"{base_dir}/elementdic.dat") as f:
         elementdic = json.load(f)
     dfsavedict = {}
 
@@ -286,7 +302,7 @@ def results_to_csv(resultslist,waverangelist,fitlist,outputfile,elements,savefil
     print(df)
     return df
 
-def convert_wave_from_text(filename = "wave-regions.txt"):
+def convert_wave_from_text(filename = f"{base_dir}/wave-regions.txt"):
     wave_range_lists = []
     lines = open(filename).readlines()
     lines = np.array(lines)
@@ -387,7 +403,7 @@ def run(configfile,**kwargs):
             model_atm_file = kwargs.get("model_atm_file", model_atm_file)
             if not os.path.exists(model_atm_file):
                 raise FileNotFoundError(f"No file with filename - {model_atm_file} found")
-            os.system(f"cp {model_atm_file} ./data/atmosphere.krz")
+            os.system(f"cp {base_dir}/{model_atm_file} {base_dir}/data/atmosphere.krz")
 
         except:
             raise ValueError("No parameter named model_atm_file found.")
