@@ -1,7 +1,7 @@
 import json
 import os
 import configparser
-from parameters import params, get_key, FORTRAN_MAX_ALLOWED_RANGE, FORTRAN_WINDOW_SIZE
+from Config.parameters import params, get_key, FORTRAN_MAX_ALLOWED_RANGE, FORTRAN_WINDOW_SIZE
 
 class ConfigWriter:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))

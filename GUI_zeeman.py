@@ -16,7 +16,7 @@ from Widgets.Dropdown import DropDownMenu
 from Config.Reader import ConfigReader
 from Config.Writer import ConfigWriter
 from Widgets.WaveRangePage import WaveRangePage
-from parameters import params, get_key as get_params_key
+from Config.parameters import params, get_key as get_params_key
 from Widgets.ListBuilder import ListBuilderWidget
 from Zeeman import zeeman_python
 
