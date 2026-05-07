@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 import numpy as np
 import pyqtgraph as pg
+import os
 
 from Models.Elements import Elements
 from Widgets.Rows.ParameterRow import ParameterRow
@@ -19,7 +20,11 @@ from parameters import params, get_key as get_params_key
 from Widgets.ListBuilder import ListBuilderWidget
 from Zeeman import zeeman_python
 
-uiclass, baseclass = pg.Qt.loadUiType("Widgets/plot.ui")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UI_FILE_PATH = os.path.join(BASE_DIR, "Widgets", "plot.ui")
+ELEMENTS_FILE_PATH = os.path.join(BASE_DIR, "Zeeman/data", "newatom.dat")
+
+uiclass, baseclass = pg.Qt.loadUiType(UI_FILE_PATH)
 
 class MainWindow(uiclass, baseclass):
 
@@ -79,7 +84,7 @@ class MainWindow(uiclass, baseclass):
         self.initiate_fields(self.page_3.layout())
         self.elementTable = ElementTable(self.elementsContainer.layout())
 
-        self.elementData = self.load_elements("Zeeman/data/newatom.dat")
+        self.elementData = self.load_elements(ELEMENTS_FILE_PATH)
 
         self.elementDropDown = DropDownMenu(self.SelectElements, self.elementData.keys())
         self.elementDropDown.popup.elementToggled.connect(self.handle_element_toggle)
