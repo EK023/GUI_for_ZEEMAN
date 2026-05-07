@@ -81,12 +81,6 @@ class ConfigReader:
         # 3. Clean up the slashes and return the absolute path
         return os.path.normpath(full_path)
 
-    def merge_element_data(self, elements):
-        return [
-            [el, est, fit]
-            for el, est, fit in elements
-        ]
-
     def read(self):
         config = configparser.ConfigParser(delimiters=(':'), comment_prefixes="#")
         config.read(self.config_path)
@@ -108,5 +102,4 @@ class ConfigReader:
 
         # transform data to the style it needs to be for the ui classes
         data['wave_range_lists'] = self.merge_ranges(data['wave_range_lists'])
-        data["elements"] = self.merge_element_data(data["elements"])
         return data
