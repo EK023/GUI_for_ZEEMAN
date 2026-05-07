@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QLabel,
 )
-from NumberValidator import NumericInput
+from Widgets.NumberValidator import NumericInput
 from Widgets.Rows.BaseRow import BaseRow
 
 class ParameterRow(BaseRow):

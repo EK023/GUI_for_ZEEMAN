@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtCore import QEvent, Qt, QEvent
-from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QToolButton, QVBoxLayout, QWidget, QScrollArea, QHBoxLayout
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 import numpy as np
 import pyqtgraph as pg
@@ -19,7 +19,7 @@ from parameters import params, get_key as get_params_key
 from Widgets.ListBuilder import ListBuilderWidget
 from Zeeman import zeeman_python
 
-uiclass, baseclass = pg.Qt.loadUiType("plot.ui")
+uiclass, baseclass = pg.Qt.loadUiType("Widgets/plot.ui")
 
 class MainWindow(uiclass, baseclass):
 
@@ -259,18 +259,33 @@ class MainWindow(uiclass, baseclass):
         dlg = QMessageBox(self)
         dlg.setWindowTitle("Information about the GUI")
         dlg.setText("""
-            Editing selected wave ranges from the plot
+            * Editing selected wave ranges from the plot
             is a little odd, easiest way is to edit them 
-            from the side
+            from the side.
+
+            * In iterlist, the deleting works by clicking 
+            on either the group or a item you want to delete.
+            Deleting the group removes all the elemensts as well
+            that were in the group.
+                    
+            * At the moment the list numbers might appear multiple 
+            times when you delete a group from the middle, it doesn't 
+            change anything in the underlying logic, 
+            will fix it in the future.
+
+            * To delete a wave range grouping, navigate to
+            the appropriate wave range group in the sidepanel and 
+            click the - Group button on the very left.
                     
             Good old checklist:
-                    
+             -------------------------------------------------------------------
             * put the right file in observed.dat
             * input your initial estimate parameters
             * set the appropriate elements to be fittable
             * set vsini to be fittable or fixed
             * used the right line list in vlines.dat
             * set spectral windows and Itot in zmodel.dat
+            -------------------------------------------------------------------
 
         """)
         dlg.setStandardButtons(QMessageBox.Ok)
