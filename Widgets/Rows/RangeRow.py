@@ -1,7 +1,4 @@
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QPushButton,
-)
+from PySide6.QtWidgets import QHBoxLayout, QPushButton
 from PySide6.QtCore import Signal
 
 from Widgets.NumberValidator import NumericInput

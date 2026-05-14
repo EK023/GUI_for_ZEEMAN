@@ -1,7 +1,4 @@
-from PySide6.QtWidgets import (
-    QCheckBox,
-    QLabel,
-)
+from PySide6.QtWidgets import QCheckBox, QLabel
 from Widgets.NumberValidator import NumericInput
 from Widgets.Rows.BaseRow import BaseRow
 from Models.Elements import Elements

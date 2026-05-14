@@ -6,12 +6,9 @@
 * if you don't have git: [tutorial for git installation](https://git-scm.com/install/)
 
 
-### Running the code
+### Setup
 
-* First install all the required dependencies:
-```pip install -r requirements.txt```
-
-* Then copy all the necessary files to run the Zeeman into Zeeman folder.
+* First copy all the necessary files to run the Zeeman into Zeeman folder.
 Also add the necessary format files that are need for zeeman_python.py
 zmodel_format.dat, inlmam_format.dat, elementdic.dat (all of these go into Zeeman folder)
 (didn't add those yet because not sure if I have the right to distribute these)
@@ -21,5 +18,23 @@ zmodel_format.dat, inlmam_format.dat, elementdic.dat (all of these go into Zeema
 * If you forget to add it and run the program then please close it and then change the previous value.
 * At the moment zeeman_python.py runs in the terminal where you started the GUI and its results are also shown there. While it runs the GUI is not operatable and you need to wait till the zeeman_python.py finishes its job.
 
-* Finally navigate to the folder where the code was installed and run it from the terminal
+### Running the code 
+
+Using standard Python
+
+* Install all the required dependencies:
+```pip install -r requirements.txt```
+
+* Navigate to the folder where the code was installed and run it from the terminal
 ```python3 GUI_zeeman.py```
+* Also you can run it from anywhere so following command works as well
+```python3 <path_to_GUI_zeeman.py>```
+
+Using anaconda (Conda)
+
+* Create the environment from the file
+```conda env create -f environment.yml```
+* Activate the environment 
+```conda activate zeeman_gui```
+* Run the app
+```python GUI_zeeman.py```

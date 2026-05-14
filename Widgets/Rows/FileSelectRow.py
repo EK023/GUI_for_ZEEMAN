@@ -1,8 +1,5 @@
-from PySide6.QtWidgets import (
-    QFileDialog,
-    QPushButton,
-    QLabel,
-)
+from PySide6.QtWidgets import  QFileDialog, QPushButton, QLabel
+
 from Widgets.Rows.BaseRow import BaseRow
 
 class FileSelectRow(BaseRow):

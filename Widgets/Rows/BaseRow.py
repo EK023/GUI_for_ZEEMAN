@@ -1,7 +1,4 @@
-from PySide6.QtWidgets import (
-    QWidget,
-
-)
+from PySide6.QtWidgets import QWidget
 
 class BaseRow(QWidget):
     def __init__(self, name=None):
