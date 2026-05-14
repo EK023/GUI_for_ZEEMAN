@@ -63,6 +63,11 @@ class ConfigReader:
             
         return final_pages
     
+    def check_iterlist(self, lst):
+        if isinstance(lst[0], (str,)):
+            return [lst]
+        return lst
+    
     def resolve_smart_path(self,read_path, anchor_directory):
         """
         Takes a path read from the config file and turns it back into an absolute path
@@ -102,4 +107,6 @@ class ConfigReader:
 
         # transform data to the style it needs to be for the ui classes
         data['wave_range_lists'] = self.merge_ranges(data['wave_range_lists'])
+        data['iterlist'] = self.check_iterlist(data['iterlist'])
+        
         return data
