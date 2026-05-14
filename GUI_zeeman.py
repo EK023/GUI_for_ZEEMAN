@@ -1,9 +1,9 @@
 import sys
 from PySide6.QtCore import QEvent, Qt, QEvent
-from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QWidget
+from Widgets.plot_ui import Ui_Widget
 
 import numpy as np
-import pyqtgraph as pg
 import os
 
 from Models.Elements import Elements
@@ -21,12 +21,10 @@ from Widgets.ListBuilder import ListBuilderWidget
 from Zeeman import zeeman_python
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UI_FILE_PATH = os.path.join(BASE_DIR, "Widgets", "plot.ui")
 ELEMENTS_FILE_PATH = os.path.join(BASE_DIR, "Zeeman/data", "newatom.dat")
 
-uiclass, baseclass = pg.Qt.loadUiType(UI_FILE_PATH)
 
-class MainWindow(uiclass, baseclass):
+class MainWindow(QWidget, Ui_Widget):
 
     
     def selectFile(self, name):
